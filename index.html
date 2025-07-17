@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>MaxBot</title>
+  <title>MaxBot - Assistente da Condovale</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="manifest.json" />
   <style>
@@ -26,21 +26,41 @@
       padding: 0.8rem;
       margin-top: 0.5rem;
     }
-    .response {
+    .chat-box {
       margin-top: 1rem;
-      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
       background: #eef2ff;
       padding: 1rem;
       border-radius: 0.5rem;
+    }
+    .msg {
+      margin-bottom: 0.8rem;
+    }
+    .msg.user {
+      text-align: right;
+      color: #004488;
+      font-weight: bold;
+    }
+    .msg.bot {
+      text-align: left;
+    }
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>MaxBot 🤖</h1>
-    <textarea id="input" rows="4" placeholder="Digite sua mensagem..."></textarea>
-    <button onclick="enviar()">Enviar</button>
-    <div class="response" id="resposta"></div>
+    <h2>🤖 MaxBot - Assistente Condovale</h2>
+    <div class="chat-box" id="chat"></div>
+    <textarea id="input" rows="3" placeholder="Digite sua mensagem..."></textarea>
+    <div class="buttons">
+      <button onclick="enviar()">Enviar</button>
+      <button onclick="limpar()">Limpar</button>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>
