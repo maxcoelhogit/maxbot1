@@ -5,7 +5,7 @@ async function enviar() {
   respostaDiv.textContent = 'Pensando... 🤔';
 
   try {
-    const resposta = await fetch('URL_DO_SEU_WEBAPP', {
+    const resposta = await fetch('https://script.google.com/macros/s/AKfycbxc2rktlNwFbdrrasIIVG0ReYfha7oEGnqzPgtFupgcfBdeDlOiDXOrH7-L3ejv2K8/exec', {
       method: 'POST',
       body: JSON.stringify({ mensagem: input }),
       headers: { 'Content-Type': 'application/json' }
