@@ -28,7 +28,7 @@
     }
     .chat-box {
       margin-top: 1rem;
-      max-height: 300px;
+      max-height: 400px;
       overflow-y: auto;
       background: #eef2ff;
       padding: 1rem;
@@ -44,11 +44,7 @@
     }
     .msg.bot {
       text-align: left;
-    }
-    .buttons {
-      display: flex;
-      gap: 1rem;
-      margin-top: 0.5rem;
+      color: #000;
     }
   </style>
 </head>
@@ -57,10 +53,7 @@
     <h2>🤖 MaxBot - Assistente Condovale</h2>
     <div class="chat-box" id="chat"></div>
     <textarea id="input" rows="3" placeholder="Digite sua mensagem..."></textarea>
-    <div class="buttons">
-      <button onclick="enviar()">Enviar</button>
-      <button onclick="limpar()">Limpar</button>
-    </div>
+    <button onclick="enviar()">Enviar</button>
   </div>
   <script src="script.js"></script>
 </body>
