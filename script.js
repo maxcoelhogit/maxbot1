@@ -1,39 +1,49 @@
-let threadId = localStorage.getItem("thread_id") || "";
+const ENDPOINT = "https://script.googleusercontent.com/a/macros/condovale.com.br/echo?user_content_key=AehSKLjNc_rfWu6YInzloSFqnXMIy0GvTLuzUJMVFOBmtvnOuSzvamxxsoFouJ7Zv_KMks8OSS1QCXBpLtP2-oTojM-Q7drr9KVaMMPF-rgaQCXsxFqclBOQErDZ8VDmFRzXRjM4RUlTd3icjmG7TJ5p9ujO7YlwYQdZOsyM8bgBZOLTicbo6EHHpvySNzwu_yPNDtiwkBmBUPR_9UorUnRv-dvbIP8eG8uw3hjyuaBb91FUZRfisV7vtjnUiPFkCRj4gX5p8AoauLh4-B3C0n2pI2LE94ldcRVOufOlpv9M2P-1pjIf5aA9_-5NN4miBg&lib=M-p1kd9EAcWVAyx4TSOssz_p6K4dVRFHJ";
 
-async function enviarMensagem() {
-  const input = document.getElementById("mensagem");
-  const mensagem = input.value.trim();
-  if (!mensagem) return;
+document.getElementById("pergunta-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-  adicionarAoHistorico("Você", mensagem);
+  const input = document.getElementById("pergunta");
+  const pergunta = input.value.trim();
+  if (!pergunta) return;
+
+  // Limpa campo
   input.value = "";
 
+  // Adiciona pergunta ao histórico
+  const historico = document.getElementById("historico");
+  const perguntaElem = document.createElement("div");
+  perguntaElem.className = "pergunta";
+  perguntaElem.textContent = "Você: " + pergunta;
+  historico.appendChild(perguntaElem);
+
+  // Usa ou cria novo thread_id
+  let threadId = localStorage.getItem("thread_id") || "";
+
   try {
-    const resposta = await fetch("https://script.googleusercontent.com/a/macros/condovale.com.br/echo?user_content_key=AehSKLijkQsfyI-5bzi4I0a00UpcWX-b41BFMvJw7mRVwU3XLonNkalD-wBfam4IjTdFlIhMpgK_MwiwdlxyW674dGLZcTfvEi_TWjuBJyUkheDo5k6egR1dAZfBb15LKYJdxrSQikLTaIJ9JM3e0LRQbbIzvc1BENcMEylSGnrq6CWIklmqA7N_XB1KFCtg-1U6RItLXNSvXIIseYY2GRXwubu2tEt8uvy97eiBdJbHCLKMG0N3gqSUY9l2eBNPMtpZgJOf2EeqMS0fH6XnQni9bWAYX2cNHjTWopmupL-zwdR8S3rdXIG43dK--JVHYg&lib=M-p1kd9EAcWVAyx4TSOssz_p6K4dVRFHJ", {
+    const resposta = await fetch(ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        mensagem,
-        thread_id: threadId
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mensagem: pergunta, thread_id: threadId })
     });
 
     const data = await resposta.json();
-    adicionarAoHistorico("MaxBot", data.resposta);
-    if (data.thread_id) {
-      threadId = data.thread_id;
-      localStorage.setItem("thread_id", threadId);
-    }
-  } catch (err) {
-    adicionarAoHistorico("MaxBot", "Erro ao conectar com o servidor.");
-  }
-}
 
-function adicionarAoHistorico(remetente, texto) {
-  const historico = document.getElementById("historico");
-  const div = document.createElement("div");
-  div.innerHTML = `<strong>${remetente}:</strong> ${texto}`;
-  historico.appendChild(div);
-}
+    // Atualiza thread_id se necessário
+    if (data.thread_id) {
+      localStorage.setItem("thread_id", data.thread_id);
+    }
+
+    // Mostra resposta
+    const respostaElem = document.createElement("div");
+    respostaElem.className = "resposta";
+    respostaElem.textContent = "MaxBot: " + (data.resposta || "Erro ao responder.");
+    historico.appendChild(respostaElem);
+
+  } catch (err) {
+    const erroElem = document.createElement("div");
+    erroElem.className = "erro";
+    erroElem.textContent = "MaxBot: Erro ao conectar com o servidor.";
+    historico.appendChild(erroElem);
+  }
+});
