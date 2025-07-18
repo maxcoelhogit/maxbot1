@@ -2,58 +2,75 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>MaxBot - Assistente da Condovale</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="manifest" href="manifest.json" />
+  <title>MaxBot - Assistente Condovale</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 1rem;
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f2f2f2;
+      display: flex; flex-direction: column; align-items: center;
     }
+
     .container {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    textarea, button {
+      max-width: 600px;
       width: 100%;
-      font-size: 1rem;
-      padding: 0.8rem;
-      margin-top: 0.5rem;
+      margin: 2rem;
+      padding: 2rem;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
-    .chat-box {
-      margin-top: 1rem;
-      max-height: 400px;
-      overflow-y: auto;
-      background: #eef2ff;
+
+    #historico {
+      margin-bottom: 1rem;
       padding: 1rem;
+      border: 1px solid #ccc;
       border-radius: 0.5rem;
+      height: 300px;
+      overflow-y: auto;
+      background-color: #fafafa;
     }
-    .msg {
-      margin-bottom: 0.8rem;
+
+    #mensagem {
+      width: 100%;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
     }
-    .msg.user {
-      text-align: right;
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      background-color: #004488;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #003366;
+    }
+
+    strong {
       color: #004488;
-      font-weight: bold;
     }
-    .msg.bot {
-      text-align: left;
-      color: #000;
+
+    @media (max-width: 600px) {
+      .container { margin: 1rem; padding: 1rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>🤖 MaxBot - Assistente Condovale</h2>
-    <div class="chat-box" id="chat"></div>
-    <textarea id="input" rows="3" placeholder="Digite sua mensagem..."></textarea>
-    <button onclick="enviar()">Enviar</button>
+    <h2>MaxBot - Assistente Condovale</h2>
+    <div id="historico"></div>
+    <input type="text" id="mensagem" placeholder="Digite sua mensagem..." onkeydown="if(event.key === 'Enter') enviarMensagem()" />
+    <button onclick="enviarMensagem()">Enviar</button>
   </div>
   <script src="script.js"></script>
 </body>
