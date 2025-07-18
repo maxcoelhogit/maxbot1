@@ -1,66 +1,42 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const form = document.getElementById("formulario");
-  const input = document.getElementById("mensagem");
-  const chat = document.getElementById("chat");
+const formulario = document.querySelector("form");
+const inputUsuario = document.getElementById("pergunta");
+const respostaDiv = document.getElementById("resposta");
+const threadInput = document.getElementById("thread_id");
 
-  let thread_id = "";
+formulario.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const mensagem = input.value.trim();
-    if (!mensagem) return;
+  const mensagem = inputUsuario.value;
+  const thread_id = threadInput.value || null;
 
-    adicionarMensagem("Você", mensagem, "user");
-    input.value = "";
-    input.disabled = true;
+  respostaDiv.innerHTML = "<p><em>Pensando...</em></p>";
 
-    try {
-      const resposta = await fetch("https://maxbot-gamma.vercel.app/ask", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          mensagem: mensagem,
-          thread_id: thread_id
-        }),
-      });
+  try {
+    const resposta = await fetch("https://maxbot-gamma.vercel.app/ask", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        mensagem: mensagem,
+        thread_id: thread_id
+      }),
+    });
 
-      if (!resposta.ok) throw new Error("Falha ao se conectar ao servidor.");
+    const data = await resposta.json();
 
-      const dados = await resposta.json();
-
-      if (dados.resposta) {
-        thread_id = dados.thread_id || thread_id;
-        adicionarMensagem("MaxBot", dados.resposta, "bot");
-      } else {
-        adicionarMensagem("MaxBot", "Erro ao processar a resposta.", "erro");
-      }
-    } catch (erro) {
-      console.error(erro);
-      adicionarMensagem("MaxBot", "Erro ao conectar com o servidor.", "erro");
-    }
-
-    input.disabled = false;
-    input.focus();
-  });
-
-  function adicionarMensagem(remetente, mensagem, tipo) {
-    const div = document.createElement("div");
-    div.classList.add("mensagem");
-
-    if (tipo === "user") {
-      div.classList.add("mensagem-usuario");
-      div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
-    } else if (tipo === "bot") {
-      div.classList.add("mensagem-bot");
-      div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
+    if (data.resposta) {
+      respostaDiv.innerHTML = `<p>${data.resposta}</p>`;
+      threadInput.value = data.thread_id;
     } else {
-      div.classList.add("mensagem-erro");
-      div.textContent = `${remetente}: ${mensagem}`;
+      respostaDiv.innerHTML = `<p><em>Não houve resposta do assistente.</em></p>`;
+      console.warn("Resposta inválida:", data);
     }
 
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+  } catch (error) {
+    console.error("Erro ao enviar pergunta:", error);
+    respostaDiv.innerHTML = `<p><em>Erro ao conectar ao servidor.</em></p>`;
   }
+
+  inputUsuario.value = "";
 });
