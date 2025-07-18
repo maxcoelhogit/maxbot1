@@ -4,73 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MaxBot - Assistente Condovale</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0; padding: 0;
-      background: #f2f2f2;
-      display: flex; flex-direction: column; align-items: center;
-    }
-
-    .container {
-      max-width: 600px;
-      width: 100%;
-      margin: 2rem;
-      padding: 2rem;
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-
-    #historico {
-      margin-bottom: 1rem;
-      padding: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      height: 300px;
-      overflow-y: auto;
-      background-color: #fafafa;
-    }
-
-    #mensagem {
-      width: 100%;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-      border-radius: 0.5rem;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      width: 100%;
-      padding: 1rem;
-      font-size: 1rem;
-      background-color: #004488;
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #003366;
-    }
-
-    strong {
-      color: #004488;
-    }
-
-    @media (max-width: 600px) {
-      .container { margin: 1rem; padding: 1rem; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h2>MaxBot - Assistente Condovale</h2>
-    <div id="historico"></div>
-    <input type="text" id="mensagem" placeholder="Digite sua mensagem..." onkeydown="if(event.key === 'Enter') enviarMensagem()" />
-    <button onclick="enviarMensagem()">Enviar</button>
+    <h1>MaxBot</h1>
+    <div id="historico" class="historico"></div>
+    <form id="pergunta-form">
+      <input
+        type="text"
+        id="pergunta"
+        placeholder="Digite sua mensagem..."
+        autocomplete="off"
+        required
+      />
+      <button type="submit">Enviar</button>
+    </form>
   </div>
   <script src="script.js"></script>
 </body>
