@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     input.disabled = true;
 
     try {
-      const resposta = await fetch("https://maxbot-gamma.vercel.app/", {
+      const resposta = await fetch("https://maxbot-gamma.vercel.app/ask", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
