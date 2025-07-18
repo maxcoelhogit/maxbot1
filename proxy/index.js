@@ -51,7 +51,7 @@ app.post('/ask', async (req, res) => {
 
     const runId = runRes.id;
 
-    let status = 'in_progress', output;
+    let status = 'in_progress';
     while (status === 'in_progress') {
       await new Promise(r => setTimeout(r, 2000));
       const runCheck = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
