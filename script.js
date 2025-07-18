@@ -1,4 +1,4 @@
-const ENDPOINT = "https://script.googleusercontent.com/a/macros/condovale.com.br/echo?user_content_key=AehSKLjNc_rfWu6YInzloSFqnXMIy0GvTLuzUJMVFOBmtvnOuSzvamxxsoFouJ7Zv_KMks8OSS1QCXBpLtP2-oTojM-Q7drr9KVaMMPF-rgaQCXsxFqclBOQErDZ8VDmFRzXRjM4RUlTd3icjmG7TJ5p9ujO7YlwYQdZOsyM8bgBZOLTicbo6EHHpvySNzwu_yPNDtiwkBmBUPR_9UorUnRv-dvbIP8eG8uw3hjyuaBb91FUZRfisV7vtjnUiPFkCRj4gX5p8AoauLh4-B3C0n2pI2LE94ldcRVOufOlpv9M2P-1pjIf5aA9_-5NN4miBg&lib=M-p1kd9EAcWVAyx4TSOssz_p6K4dVRFHJ";
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbwT_JDV0N-6TJPKvnVtFRX7BYvJl7HxcclNu5BV0bV3KwsvaIH5TjQIO_HPusdWq6Y/exec";
 
 document.getElementById("pergunta-form").addEventListener("submit", async function (e) {
   e.preventDefault();
