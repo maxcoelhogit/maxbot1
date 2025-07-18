@@ -1,6 +1,6 @@
 const chatBox = document.getElementById('chat');
 const input = document.getElementById('input');
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw1lVKyoI15FWIEplkaw0UMa728xk3lU_u9Z4LKqVDfmFd4u4YEUePlAuyeeFOYUVk/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzpn8-JsSNw8y7LL_V9nD941Z9r4lAvMRQFlt8YC4MWwfg3sZrfF3MXki8BXbzngJo/exec";
 
 async function enviar() {
   const texto = input.value.trim();
