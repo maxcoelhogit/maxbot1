@@ -1,29 +1,35 @@
 const chatBox = document.getElementById('chat');
 const input = document.getElementById('input');
-
-// Substitua pela URL do seu Web App:
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxc2rktlNwFbdrrasIIVG0ReYfha7oEGnqzPgtFupgcfBdeDlOiDXOrH7-L3ejv2K8/exec";
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw1lVKyoI15FWIEplkaw0UMa728xk3lU_u9Z4LKqVDfmFd4u4YEUePlAuyeeFOYUVk/exec";
 
 async function enviar() {
   const texto = input.value.trim();
   if (!texto) return;
 
   adicionarMensagem(texto, 'user');
-  input.value = ''; // limpa automaticamente
+  input.value = '';
 
   adicionarMensagem('Digitando...', 'bot');
+
+  const threadId = sessionStorage.getItem("thread_id") || "";
 
   try {
     const resposta = await fetch(WEBAPP_URL, {
       method: 'POST',
-      body: JSON.stringify({ mensagem: texto }),
+      body: JSON.stringify({ mensagem: texto, thread_id: threadId }),
       headers: { 'Content-Type': 'application/json' }
     });
 
     const dados = await resposta.json();
+
+    if (dados.thread_id) {
+      sessionStorage.setItem("thread_id", dados.thread_id);
+    }
+
     atualizarUltimaMensagem(dados.resposta || 'Erro ao gerar resposta.');
   } catch (e) {
     atualizarUltimaMensagem('Erro na conexão.');
+    console.error(e);
   }
 }
 
