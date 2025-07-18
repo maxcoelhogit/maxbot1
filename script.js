@@ -1,50 +1,39 @@
-const chatBox = document.getElementById('chat');
-const input = document.getElementById('input');
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxsPWBwenxkbKJ9W-wbODpIahW8LthF4EONgVo5lfpOosAKQrwDoaZzovxmD9sCVmI/exec";
+let threadId = localStorage.getItem("thread_id") || "";
 
-async function enviar() {
-  const texto = input.value.trim();
-  if (!texto) return;
+async function enviarMensagem() {
+  const input = document.getElementById("mensagem");
+  const mensagem = input.value.trim();
+  if (!mensagem) return;
 
-  adicionarMensagem(texto, 'user');
-  input.value = '';
-
-  adicionarMensagem('Digitando...', 'bot');
-
-  const threadId = sessionStorage.getItem("thread_id") || "";
+  adicionarAoHistorico("Você", mensagem);
+  input.value = "";
 
   try {
-    const resposta = await fetch(WEBAPP_URL, {
-      method: 'POST',
-      body: JSON.stringify({ mensagem: texto, thread_id: threadId }),
-      headers: { 'Content-Type': 'application/json' }
+    const resposta = await fetch("https://script.googleusercontent.com/a/macros/condovale.com.br/echo?user_content_key=AehSKLijkQsfyI-5bzi4I0a00UpcWX-b41BFMvJw7mRVwU3XLonNkalD-wBfam4IjTdFlIhMpgK_MwiwdlxyW674dGLZcTfvEi_TWjuBJyUkheDo5k6egR1dAZfBb15LKYJdxrSQikLTaIJ9JM3e0LRQbbIzvc1BENcMEylSGnrq6CWIklmqA7N_XB1KFCtg-1U6RItLXNSvXIIseYY2GRXwubu2tEt8uvy97eiBdJbHCLKMG0N3gqSUY9l2eBNPMtpZgJOf2EeqMS0fH6XnQni9bWAYX2cNHjTWopmupL-zwdR8S3rdXIG43dK--JVHYg&lib=M-p1kd9EAcWVAyx4TSOssz_p6K4dVRFHJ", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        mensagem,
+        thread_id: threadId
+      })
     });
 
-    const dados = await resposta.json();
-
-    if (dados.thread_id) {
-      sessionStorage.setItem("thread_id", dados.thread_id);
+    const data = await resposta.json();
+    adicionarAoHistorico("MaxBot", data.resposta);
+    if (data.thread_id) {
+      threadId = data.thread_id;
+      localStorage.setItem("thread_id", threadId);
     }
-
-    atualizarUltimaMensagem(dados.resposta || 'Erro ao gerar resposta.');
-  } catch (e) {
-    atualizarUltimaMensagem('Erro na conexão.');
-    console.error(e);
+  } catch (err) {
+    adicionarAoHistorico("MaxBot", "Erro ao conectar com o servidor.");
   }
 }
 
-function adicionarMensagem(msg, classe) {
-  const div = document.createElement('div');
-  div.className = `msg ${classe}`;
-  div.textContent = msg;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function atualizarUltimaMensagem(texto) {
-  const msgs = chatBox.querySelectorAll('.msg.bot');
-  if (msgs.length) {
-    msgs[msgs.length - 1].textContent = texto;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+function adicionarAoHistorico(remetente, texto) {
+  const historico = document.getElementById("historico");
+  const div = document.createElement("div");
+  div.innerHTML = `<strong>${remetente}:</strong> ${texto}`;
+  historico.appendChild(div);
 }
