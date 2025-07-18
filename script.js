@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     input.disabled = true;
 
     try {
-      const resposta = await fetch("https://script.googleusercontent.com/a/macros/condovale.com.br/echo?user_content_key=AehSKLjNc_rfWu6YInzloSFqnXMIy0GvTLuzUJMVFOBmtvnOuSzvamxxsoFouJ7Zv_KMks8OSS1QCXBpLtP2-oTojM-Q7drr9KVaMMPF-rgaQCXsxFqclBOQErDZ8VDmFRzXRjM4RUlTd3icjmG7TJ5p9ujO7YlwYQdZOsyM8bgBZOLTicbo6EHHpvySNzwu_yPNDtiwkBmBUPR_9UorUnRv-dvbIP8eG8uw3hjyuaBb91FUZRfisV7vtjnUiPFkCRj4gX5p8AoauLh4-B3C0n2pI2LE94ldcRVOufOlpv9M2P-1pjIf5aA9_-5NN4miBg&lib=M-p1kd9EAcWVAyx4TSOssz_p6K4dVRFHJ", {
+      const resposta = await fetch("https://maxbot-gamma.vercel.app/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
