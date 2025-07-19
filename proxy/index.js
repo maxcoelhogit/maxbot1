@@ -6,16 +6,20 @@ import { OpenAI } from "openai";
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(bodyParser.json());
-
-// ✅ CORS atualizado com origem específica do seu frontend
+// ✅ CORS para GitHub Pages com OPTIONS
 app.use(
   cors({
     origin: "https://maxcoelhogit.github.io",
-    methods: ["POST", "GET", "OPTIONS"],
+    methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
   })
 );
+
+// ✅ Middleware extra para OPTIONS
+app.options("*", cors());
+
+app.use(bodyParser.json());
 
 const openai = new OpenAI({
   apiKey: process.env.GPT_KEY,
@@ -42,7 +46,6 @@ app.post("/ask", async (req, res) => {
       assistant_id: assistant_id,
     });
 
-    // Espera o processamento da resposta
     let status = "queued";
     let resposta = "Sem resposta.";
 
@@ -58,13 +61,13 @@ app.post("/ask", async (req, res) => {
       resposta = ultimaMensagem?.content[0]?.text?.value || "Sem resposta.";
     }
 
-    res.json({ resposta: resposta, thread_id: threadId });
+    res.json({ resposta, thread_id: threadId });
   } catch (error) {
-    console.error("Erro no servidor:", error);
-    res.status(500).json({ erro: "Erro interno no servidor" });
+    console.error("Erro ao gerar resposta:", error);
+    res.status(500).json({ erro: "Erro no servidor" });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+  console.log(`Servidor iniciado na porta ${port}`);
 });
