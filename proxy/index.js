@@ -1,114 +1,70 @@
 import express from "express";
 import cors from "cors";
+import bodyParser from "body-parser";
+import { OpenAI } from "openai";
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const port = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 3000;
+app.use(bodyParser.json());
 
-const GPT_KEY = process.env.GPT_KEY;
-const GPT_ASSISTANT_ID = process.env.GPT_ASSISTANT_ID;
+// ✅ CORS atualizado com origem específica do seu frontend
+app.use(
+  cors({
+    origin: "https://maxcoelhogit.github.io",
+    methods: ["POST", "GET", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-app.get("/", (req, res) => {
-  res.send("Proxy do MaxBot está no ar!");
+const openai = new OpenAI({
+  apiKey: process.env.GPT_KEY,
 });
+
+const assistant_id = process.env.GPT_ASSISTANT_ID;
 
 app.post("/ask", async (req, res) => {
-  const { mensagem, thread_id } = req.body;
-
-  if (!mensagem || !GPT_KEY || !GPT_ASSISTANT_ID) {
-    return res.status(400).json({ erro: "Requisição inválida." });
-  }
-
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${GPT_KEY}`,
-    "OpenAI-Beta": "assistants=v2",
-  };
-
   try {
-    // Cria nova thread se não houver
+    const { mensagem, thread_id } = req.body;
+
     let threadId = thread_id;
     if (!threadId) {
-      const novaThread = await fetch("https://api.openai.com/v1/threads", {
-        method: "POST",
-        headers,
-      });
-      const novaThreadData = await novaThread.json();
-      threadId = novaThreadData.id;
-      console.log("Nova thread criada:", threadId);
+      const thread = await openai.beta.threads.create();
+      threadId = thread.id;
     }
 
-    // Envia mensagem
-    await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        role: "user",
-        content: mensagem,
-      }),
+    await openai.beta.threads.messages.create(threadId, {
+      role: "user",
+      content: mensagem,
     });
 
-    // Executa o assistente
-    const runResponse = await fetch(
-      `https://api.openai.com/v1/threads/${threadId}/runs`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          assistant_id: GPT_ASSISTANT_ID,
-        }),
-      }
-    );
-    const run = await runResponse.json();
-    console.log("Run iniciado:", run.id);
+    const run = await openai.beta.threads.runs.create(threadId, {
+      assistant_id: assistant_id,
+    });
 
-    // Aguarda o run finalizar (polling com segurança)
+    // Espera o processamento da resposta
     let status = "queued";
-    let tentativas = 0;
-    let runStatusData;
+    let resposta = "Sem resposta.";
 
-    while (status !== "completed" && status !== "failed" && tentativas < 15) {
-      await new Promise((r) => setTimeout(r, 2000)); // espera 2s
-      const statusRes = await fetch(
-        `https://api.openai.com/v1/threads/${threadId}/runs/${run.id}`,
-        { headers }
-      );
-      runStatusData = await statusRes.json();
-      status = runStatusData.status;
-      tentativas++;
-      console.log(`Tentativa ${tentativas}: status = ${status}`);
+    while (status !== "completed" && status !== "failed") {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const updatedRun = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      status = updatedRun.status;
     }
 
-    if (status !== "completed") {
-      console.error("Run não completado a tempo:", runStatusData);
-      return res
-        .status(500)
-        .json({ erro: "Assistente não respondeu a tempo." });
+    if (status === "completed") {
+      const messages = await openai.beta.threads.messages.list(threadId);
+      const ultimaMensagem = messages.data.find((msg) => msg.role === "assistant");
+      resposta = ultimaMensagem?.content[0]?.text?.value || "Sem resposta.";
     }
 
-    // Busca a resposta
-    const msgRes = await fetch(
-      `https://api.openai.com/v1/threads/${threadId}/messages`,
-      { headers }
-    );
-    const msgData = await msgRes.json();
-    console.log("Mensagens recebidas:", msgData);
-
-    const mensagens = msgData.data || [];
-    const ultima = mensagens.find((m) => m.role === "assistant");
-
-    res.json({
-      resposta: ultima ? ultima.content[0].text.value : "Sem resposta.",
-      thread_id: threadId,
-    });
-  } catch (erro) {
-    console.error("Erro no proxy:", erro);
-    res.status(500).json({ erro: "Erro ao processar mensagem." });
+    res.json({ resposta: resposta, thread_id: threadId });
+  } catch (error) {
+    console.error("Erro no servidor:", error);
+    res.status(500).json({ erro: "Erro interno no servidor" });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
 });
