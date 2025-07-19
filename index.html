@@ -9,7 +9,9 @@
 <body>
   <div class="container">
     <h1>MaxBot</h1>
-    <div id="historico" class="historico"></div>
+    
+    <div id="resposta" class="resposta"></div>
+
     <form id="pergunta-form">
       <input
         type="text"
@@ -19,8 +21,10 @@
         required
       />
       <button type="submit">Enviar</button>
+      <input type="hidden" id="thread_id" />
     </form>
   </div>
+
   <script src="script.js" defer></script>
 </body>
 </html>
