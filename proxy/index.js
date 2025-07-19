@@ -6,18 +6,14 @@ import { OpenAI } from "openai";
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ✅ CORS para GitHub Pages com OPTIONS
-app.use(
-  cors({
-    origin: "https://maxcoelhogit.github.io",
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false,
-  })
-);
-
-// ✅ Middleware extra para OPTIONS
-app.options("*", cors());
+// ✅ CORS GLOBAL para GitHub Pages
+const corsOptions = {
+  origin: "https://maxcoelhogit.github.io",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // ✅ para preflight
 
 app.use(bodyParser.json());
 
@@ -46,7 +42,7 @@ app.post("/ask", async (req, res) => {
       assistant_id: assistant_id,
     });
 
-    let status = "queued";
+    let status = run.status;
     let resposta = "Sem resposta.";
 
     while (status !== "completed" && status !== "failed") {
@@ -61,6 +57,7 @@ app.post("/ask", async (req, res) => {
       resposta = ultimaMensagem?.content[0]?.text?.value || "Sem resposta.";
     }
 
+    res.setHeader("Access-Control-Allow-Origin", "https://maxcoelhogit.github.io");
     res.json({ resposta, thread_id: threadId });
   } catch (error) {
     console.error("Erro ao gerar resposta:", error);
@@ -69,5 +66,5 @@ app.post("/ask", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor iniciado na porta ${port}`);
+  console.log(`Servidor rodando na porta ${port}`);
 });
