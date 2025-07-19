@@ -1,85 +1,45 @@
-import express from 'express';
-import cors from 'cors';
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
+export default async function handler(req, res) {
+  // Habilita CORS
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-dotenv.config();
+  // Responde às requisições OPTIONS (preflight)
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+  if (req.method !== "POST") {
+    return res.status(405).json({ erro: "Método não permitido" });
+  }
 
-const OPENAI_KEY = process.env.OPENAI_KEY;
-const ASSISTANT_ID = process.env.ASSISTANT_ID;
-
-app.post('/ask', async (req, res) => {
   try {
     const { mensagem, thread_id } = req.body;
 
-    const threadResponse = thread_id
-      ? { id: thread_id }
-      : await fetch('https://api.openai.com/v1/threads', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${OPENAI_KEY}`,
-            'OpenAI-Beta': 'assistants=v2',
-            'Content-Type': 'application/json'
-          }
-        }).then(res => res.json());
-
-    const threadId = threadResponse.id;
-
-    await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
-      method: 'POST',
+    const resposta = await fetch("https://api.openai.com/v1/threads", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'OpenAI-Beta': 'assistants=v2',
-        'Content-Type': 'application/json'
+        "Authorization": `Bearer ${process.env.GPT_KEY}`,
+        "OpenAI-Beta": "assistants=v2",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({ role: 'user', content: mensagem })
+      body: JSON.stringify({
+        messages: [{ role: "user", content: mensagem }],
+        assistant_id: process.env.GPT_ASSISTANT_ID,
+        ...(thread_id ? { thread_id } : {})
+      })
     });
 
-    const runRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'OpenAI-Beta': 'assistants=v2',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ assistant_id: ASSISTANT_ID })
-    }).then(res => res.json());
+    const data = await resposta.json();
 
-    const runId = runRes.id;
+    return res.status(200).json({
+      resposta: data?.choices?.[0]?.message?.content || "Sem resposta.",
+      thread_id: data?.thread_id || thread_id || null
+    });
 
-    let status = 'in_progress';
-    while (status === 'in_progress') {
-      await new Promise(r => setTimeout(r, 2000));
-      const runCheck = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
-        headers: {
-          'Authorization': `Bearer ${OPENAI_KEY}`,
-          'OpenAI-Beta': 'assistants=v2'
-        }
-      }).then(res => res.json());
-
-      status = runCheck.status;
-    }
-
-    const messagesRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
-      headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'OpenAI-Beta': 'assistants=v2'
-      }
-    }).then(res => res.json());
-
-    const resposta = messagesRes.data.find(msg => msg.role === 'assistant')?.content[0]?.text?.value;
-
-    res.json({ resposta, thread_id: threadId });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ erro: 'Erro no servidor' });
+  } catch (erro) {
+    console.error("Erro no proxy:", erro);
+    return res.status(500).json({ erro: "Erro ao consultar assistente." });
   }
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
+}
