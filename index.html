@@ -8,15 +8,15 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="titulo">MaxBot</h1>
-    <p class="descricao">
-      👋 Bem-vindo! Este é o assistente virtual do seu condomínio. Digite sua mensagem abaixo para receber ajuda imediata com dúvidas, regras, notificações ou documentos.
-    </p>
+    <header class="topo">
+      <h1 class="titulo">MAXBOT</h1>
+    </header>
 
-    <!-- ✅ Área onde a resposta do bot será exibida -->
-    <div id="resposta" class="resposta"></div>
+    <main class="chatbox">
+      <div id="resposta" class="resposta"></div>
+    </main>
 
-    <form id="pergunta-form">
+    <form id="pergunta-form" class="formulario">
       <input
         type="text"
         id="pergunta"
@@ -27,7 +27,9 @@
       <button type="submit">Enviar</button>
     </form>
 
-    <p class="rodape">Developed and maintained by Maxwell Coelho · All rights reserved · 2025</p>
+    <footer class="rodape">
+      <small>Developed and maintained by Maxwell Coelho · All rights reserved · 2025</small>
+    </footer>
   </div>
 
   <script src="script.js" defer></script>
