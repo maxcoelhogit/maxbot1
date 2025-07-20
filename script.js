@@ -1,9 +1,16 @@
 const form = document.getElementById("pergunta-form");
 const input = document.getElementById("pergunta");
 const respostaDiv = document.getElementById("resposta");
-const digitandoDiv = document.getElementById("digitando");
-
 let thread_id = null;
+
+// Saudação inicial
+window.onload = () => {
+  adicionarMensagem(
+    "MaxBot",
+    "👋 Olá! Sou o MaxBot, o assistente virtual do seu condomínio. Estou aqui para te ajudar com dúvidas, notificações, documentos, regras internas e muito mais. Digite sua mensagem abaixo e veja como posso ajudar. 😊",
+    "bot"
+  );
+};
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -12,7 +19,13 @@ form.addEventListener("submit", async (e) => {
 
   adicionarMensagem("Você", pergunta, "user");
   input.value = "";
-  digitandoDiv.style.display = "block";
+
+  // ✅ Adiciona dinamicamente a animação "digitando"
+  const digitando = document.createElement("div");
+  digitando.classList.add("mensagem-bot");
+  digitando.textContent = "MaxBot está digitando...";
+  respostaDiv.appendChild(digitando);
+  respostaDiv.scrollTop = respostaDiv.scrollHeight;
 
   try {
     const resposta = await fetch("https://maxbot-gamma.vercel.app/api/chat", {
@@ -23,7 +36,9 @@ form.addEventListener("submit", async (e) => {
 
     const data = await resposta.json();
     thread_id = data.thread_id;
-    digitandoDiv.style.display = "none";
+
+    // ✅ Remove o "digitando" antes de mostrar a resposta real
+    respostaDiv.removeChild(digitando);
 
     if (data.resposta) {
       adicionarMensagem("MaxBot", data.resposta, "bot");
@@ -31,7 +46,7 @@ form.addEventListener("submit", async (e) => {
       adicionarMensagem("Erro", "Não houve resposta do assistente.", "erro");
     }
   } catch (erro) {
-    digitandoDiv.style.display = "none";
+    respostaDiv.removeChild(digitando);
     console.error("Erro ao enviar pergunta:", erro);
     adicionarMensagem("Erro", "Erro ao se conectar ao servidor.", "erro");
   }
