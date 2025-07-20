@@ -14,7 +14,7 @@ form.addEventListener("submit", async (e) => {
   try {
     console.log("Enviando pergunta para proxy...");
 
-    const resposta = await fetch("https://maxbot-gamma.vercel.app/ask", {
+    const resposta = await fetch("https://maxbot-gamma.vercel.app/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mensagem: pergunta, thread_id }),
