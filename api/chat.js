@@ -1,17 +1,18 @@
 export default async function handler(req, res) {
-  // CORS fix universal
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, OpenAI-Beta");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
-    return res.status(200).end(); // Responde ao preflight
+    return res.status(200).end();
   }
 
   try {
     const { mensagem, thread_id } = req.body;
+    console.log("📥 Mensagem recebida:", mensagem);
+    console.log("📎 Thread ID:", thread_id);
 
-    const resposta = await fetch("https://api.openai.com/v1/threads/" + (thread_id || "your-thread-id") + "/messages", {
+    const respostaOpenAI = await fetch(`https://api.openai.com/v1/threads/${thread_id || "your-thread-id"}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -24,11 +25,16 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await resposta.json();
-    res.status(200).json(data);
+    const resultado = await respostaOpenAI.json();
+    console.log("📤 Resposta da OpenAI:", resultado);
 
-  } catch (error) {
-    console.error("Erro na API:", error);
-    res.status(500).json({ erro: "Erro interno no servidor." });
+    res.status(200).json({
+      resposta: resultado?.content?.[0]?.text?.value || null,
+      thread_id
+    });
+
+  } catch (erro) {
+    console.error("❌ Erro ao gerar resposta:", erro);
+    res.status(500).json({ erro: "Erro ao gerar resposta" });
   }
 }
