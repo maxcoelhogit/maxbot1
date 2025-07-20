@@ -8,15 +8,27 @@
 </head>
 <body>
   <div class="container">
-    <header class="topo">
-      <h1 class="titulo">MAXBOT</h1>
+    <header>
+      <h1 id="logo">MAXBOT</h1>
     </header>
 
-    <main class="chatbox">
-      <div id="resposta" class="resposta"></div>
-    </main>
+    <div id="resposta" class="resposta">
+      <div class="mensagem-bot">
+        <strong>MaxBot:</strong> 👋 Olá!  
+        <br />
+        Sou o MaxBot, o assistente virtual do seu condomínio.  
+        <br /><br />
+        Estou aqui para te ajudar com dúvidas, notificações, documentos, regras internas e muito mais.  
+        <br />
+        Digite sua mensagem abaixo e veja como posso ajudar. 😊
+      </div>
+    </div>
 
-    <form id="pergunta-form" class="formulario">
+    <div id="digitando" class="digitando" style="display: none;">
+      MaxBot está digitando...
+    </div>
+
+    <form id="pergunta-form">
       <input
         type="text"
         id="pergunta"
@@ -27,8 +39,8 @@
       <button type="submit">Enviar</button>
     </form>
 
-    <footer class="rodape">
-      <small>Developed and maintained by Maxwell Coelho · All rights reserved · 2025</small>
+    <footer>
+      <p class="credito">Developed and maintained by Maxwell Coelho · All rights reserved · 2025</p>
     </footer>
   </div>
 
