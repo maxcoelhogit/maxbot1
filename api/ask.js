@@ -1,33 +1,27 @@
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // ou especifique seu domínio exato
+  // CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "https://maxcoelhogit.github.io");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
+  // Pré-verificação (preflight)
   if (req.method === "OPTIONS") {
-    res.status(200).end(); // Responde à preflight request
-    return;
+    return res.status(200).end();
   }
 
   try {
     const { mensagem, thread_id } = req.body;
 
-    const resposta = await fetch("https://api.openai.com/v1/threads/" + thread_id + "/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer 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",
-        "OpenAI-Beta": "assistants=v2"
-      },
-      body: JSON.stringify({
-        role: "user",
-        content: mensagem
-      })
-    });
+    // Exemplo de chamada (adicione sua chamada real à OpenAI aqui)
+    const resposta = {
+      texto: `Você disse: ${mensagem}`,
+      thread_id: thread_id || "novo_thread_id"
+    };
 
-    const resultado = await resposta.json();
-    res.status(200).json({ resposta: resultado });
+    return res.status(200).json({ resposta: resposta.texto, thread_id: resposta.thread_id });
+
   } catch (erro) {
-    console.error("Erro ao se comunicar com OpenAI:", erro);
-    res.status(500).json({ erro: "Erro ao se comunicar com o servidor." });
+    console.error("Erro:", erro);
+    return res.status(500).json({ erro: "Erro interno." });
   }
 }
