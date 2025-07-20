@@ -81,3 +81,10 @@ button:hover {
 .mensagem-erro {
   color: red;
 }
+
+.rodape {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 2rem;
+}
