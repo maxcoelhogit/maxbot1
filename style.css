@@ -1,59 +1,50 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: sans-serif;
   background-color: #f0f0f5;
   margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 520px;
+  justify-content: space-between;
+  max-width: 600px;
+  margin: 0 auto;
   background-color: white;
   border-radius: 10px;
-  margin: 10px;
-  padding: 10px 20px;
-  box-shadow: 0 0 10px #ccc;
+  padding: 20px;
+  box-shadow: 0px 0px 10px #ccc;
+  height: 100vh;
 }
 
-header {
-  text-align: left;
-}
-
-#logo {
-  font-size: 1.6rem;
+h1 {
   color: #004488;
-  letter-spacing: 1px;
-  font-weight: 900;
+  text-align: left;
   margin-bottom: 10px;
 }
 
 .resposta {
-  flex-grow: 1;
   background-color: #eaffea;
   padding: 10px;
-  margin-bottom: 10px;
   border-radius: 5px;
   overflow-y: auto;
-  height: 240px;
-  white-space: pre-line;
-}
-
-.digitando {
-  font-size: 0.9rem;
-  color: #999;
-  margin-bottom: 10px;
-  font-style: italic;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 form {
   display: flex;
   gap: 10px;
+  margin-top: 10px;
 }
 
 input[type="text"] {
@@ -84,6 +75,7 @@ button:hover {
 
 .mensagem-bot {
   color: #008800;
+  line-height: 1.4;
 }
 
 .mensagem-erro {
@@ -91,11 +83,8 @@ button:hover {
 }
 
 footer {
-  margin-top: 10px;
-  text-align: center;
-}
-
-.credito {
   font-size: 0.7rem;
-  color: #bbb;
+  color: #999;
+  text-align: center;
+  margin-top: 10px;
 }
