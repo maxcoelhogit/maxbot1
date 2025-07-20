@@ -52,3 +52,12 @@ function adicionarMensagem(remetente, mensagem, tipo) {
   respostaDiv.appendChild(div);
   respostaDiv.scrollTop = respostaDiv.scrollHeight;
 }
+
+// ✅ Saudação inicial automática do MaxBot
+window.addEventListener("load", () => {
+  adicionarMensagem("MaxBot", `Olá! 👋
+Sou o MaxBot, o assistente virtual do seu condomínio.
+
+Estou aqui para te ajudar com dúvidas, notificações, documentos, regras internas e muito mais.
+Digite sua mensagem abaixo e veja como posso ajudar. 😊`, "bot");
+});
