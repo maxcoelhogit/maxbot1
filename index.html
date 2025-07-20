@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MAXBOT - Assistente Condovale</title>
+
+  <!-- ✅ Ícone para fallback e PWA -->
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#004488" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -25,5 +31,17 @@
   </div>
 
   <script src="script.js" defer></script>
+
+  <!-- ✅ Registro do Service Worker para PWA -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .then((reg) => console.log("✅ Service Worker registrado!", reg.scope))
+          .catch((err) => console.error("❌ Falha ao registrar SW:", err));
+      });
+    }
+  </script>
 </body>
 </html>
