@@ -69,9 +69,16 @@ function adicionarMensagem(remetente, mensagem, tipo) {
 }
 
 function transformarLinksEmCliqueAqui(texto) {
-  return texto
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${textoLink}</a>`;
-    })
-    .replace(/\n/g, "<br>");
+  // Converte links em formato markdown: [Texto](https://...)
+  let convertido = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${textoLink}</a>`;
+  });
+
+  // Converte links soltos do tipo https://... para "Clique aqui"
+  convertido = convertido.replace(/(https?:\/\/[^\s]+)/g, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
+  });
+
+  // Preserva quebras de linha
+  return convertido.replace(/\n/g, "<br>");
 }
