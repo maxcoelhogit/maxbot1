@@ -69,19 +69,26 @@ function adicionarMensagem(remetente, mensagem, tipo) {
 }
 
 function transformarLinksEmCliqueAqui(texto) {
-  // 🔧 Corrige \[Texto\]\(link\) => [Texto](link)
-  texto = texto.replace(/\\([\[\]\(\)])/g, "$1");
-
-  // 🔄 Markdown [Texto](https://...) → <a href="..." target="_blank">Texto</a>
-  texto = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
+  let convertido = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${textoLink}</a>`;
   });
 
-  // 🔄 URLs soltas → <a href="..." target="_blank">Clique aqui</a>
-  texto = texto.replace(/(?<!href=")(https?:\/\/[^\s]+)/g, (url) => {
+  convertido = convertido.replace(/(https?:\/\/[^\s]+)/g, (url) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
   });
 
-  // 🔄 Quebras de linha
-  return texto.replace(/\n/g, "<br>");
+  return convertido.replace(/\n/g, "<br>");
+}
+
+// ✅ Ajusta a posição do formulário quando o teclado móvel aparece
+if (window.visualViewport) {
+  visualViewport.addEventListener("resize", () => {
+    const viewportHeight = window.innerHeight;
+    const visualHeight = visualViewport.height;
+    const keyboardVisible = visualHeight < viewportHeight;
+    const offset = viewportHeight - visualHeight;
+
+    const form = document.getElementById("pergunta-form");
+    form.style.transform = keyboardVisible ? `translateY(-${offset}px)` : "translateY(0)";
+  });
 }
