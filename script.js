@@ -39,7 +39,7 @@ form.addEventListener("submit", async (e) => {
     respostaDiv.removeChild(digitando);
 
     if (data.resposta) {
-      const respostaFormatada = formatarLinksMarkdown(data.resposta);
+      const respostaFormatada = formatarMarkdownParaHTML(data.resposta);
       adicionarMensagem("MaxBot", respostaFormatada, "bot", true);
     } else {
       adicionarMensagem("Erro", "Não houve resposta do assistente.", "erro");
@@ -57,7 +57,7 @@ function adicionarMensagem(remetente, mensagem, tipo, isHTML = false) {
 
   if (tipo === "user") {
     div.classList.add("mensagem-usuario");
-    div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
+    div.innerHTML = `<strong>${remetente}:</strong> ${escapeHTML(mensagem)}`;
   } else if (tipo === "bot") {
     div.classList.add("mensagem-bot");
     div.innerHTML = `<strong>${remetente}:</strong> ${isHTML ? mensagem : escapeHTML(mensagem)}`;
@@ -77,6 +77,10 @@ function escapeHTML(str) {
   });
 }
 
-function formatarLinksMarkdown(texto) {
-  return texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, `<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>`);
+function formatarMarkdownParaHTML(texto) {
+  // Converte [texto](link) para HTML clicável
+  let html = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, `<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>`);
+  // Converte quebras de linha em <br>
+  html = html.replace(/\n/g, "<br>");
+  return html;
 }
