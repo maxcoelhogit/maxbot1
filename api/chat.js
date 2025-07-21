@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
     let threadId = recebidoThreadId;
 
-    // Se não houver thread_id, cria uma nova thread
+    // Cria nova thread se necessário
     if (!threadId) {
       const novaThread = await fetch("https://api.openai.com/v1/threads", {
         method: "POST",
@@ -33,8 +33,8 @@ export default async function handler(req, res) {
       console.log("🧵 Nova thread criada:", threadId);
     }
 
-    // Adiciona a mensagem à thread
-    const mensagemRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
+    // Adiciona mensagem do usuário à thread
+    await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -47,10 +47,7 @@ export default async function handler(req, res) {
       })
     });
 
-    const mensagemData = await mensagemRes.json();
-    console.log("📤 Mensagem adicionada:", mensagemData);
-
-    // Cria a execução (run)
+    // Cria execução
     const runRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
       method: "POST",
       headers: {
@@ -65,28 +62,25 @@ export default async function handler(req, res) {
 
     const runData = await runRes.json();
     const runId = runData.id;
-
     console.log("🏃 Run iniciada:", runId);
 
-    // Aguarda a execução finalizar
+    // Aguarda execução
     let status = runData.status;
     let attempts = 0;
     while (status !== "completed" && attempts < 10) {
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       const statusRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
         headers: {
           "Authorization": `Bearer ${openaiKey}`,
           "OpenAI-Beta": "assistants=v2"
         }
       });
-
       const statusData = await statusRes.json();
       status = statusData.status;
       attempts++;
     }
 
-    // Busca a resposta final
+    // Busca resposta final
     const respostaRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       headers: {
         "Authorization": `Bearer ${openaiKey}`,
@@ -96,14 +90,14 @@ export default async function handler(req, res) {
 
     const respostaData = await respostaRes.json();
     const ultima = respostaData.data?.find(m => m.role === "assistant");
-    const resposta = ultima?.content?.[0]?.text?.value || "Sem resposta.";
+    let resposta = ultima?.content?.[0]?.text?.value || "Sem resposta.";
 
-    // 🔧 Corrige escapes \[ \] \( \)
-    const respostaCorrigida = resposta.replace(/\\([\[\]\(\)])/g, "$1");
+    // ✅ Remove referências como  
+    const respostaLimpa = resposta.replace(/【\d+:\d+†[^】]+】/g, "").trim();
 
-    console.log("✅ Resposta final:", respostaCorrigida);
+    console.log("✅ Resposta final:", respostaLimpa);
 
-    res.status(200).json({ resposta: respostaCorrigida, thread_id: threadId });
+    res.status(200).json({ resposta: respostaLimpa, thread_id: threadId });
 
   } catch (erro) {
     console.error("❌ Erro no backend:", erro);
