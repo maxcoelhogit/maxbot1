@@ -78,6 +78,16 @@ button:hover {
   line-height: 1.4;
 }
 
+/* ✅ Links clicáveis nas respostas do MaxBot */
+.mensagem-bot a {
+  color: #0044cc;
+  text-decoration: underline;
+}
+
+.mensagem-bot a:hover {
+  color: #002288;
+}
+
 .mensagem-erro {
   color: red;
 }
