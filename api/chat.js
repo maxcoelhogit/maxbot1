@@ -98,9 +98,12 @@ export default async function handler(req, res) {
     const ultima = respostaData.data?.find(m => m.role === "assistant");
     const resposta = ultima?.content?.[0]?.text?.value || "Sem resposta.";
 
-    console.log("✅ Resposta final:", resposta);
+    // 🔧 Corrige escapes \[ \] \( \)
+    const respostaCorrigida = resposta.replace(/\\([\[\]\(\)])/g, "$1");
 
-    res.status(200).json({ resposta, thread_id: threadId });
+    console.log("✅ Resposta final:", respostaCorrigida);
+
+    res.status(200).json({ resposta: respostaCorrigida, thread_id: threadId });
 
   } catch (erro) {
     console.error("❌ Erro no backend:", erro);
