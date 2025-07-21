@@ -7,7 +7,7 @@ let thread_id = null;
 window.onload = () => {
   adicionarMensagem(
     "MaxBot",
-    "👋 Olá! Sou o MaxBot, o assistente virtual do seu condomínio. Estou aqui para te ajudar com dúvidas, notificações, documentos, regras internas e muito mais. Digite sua mensagem abaixo e veja como posso ajudar. 😊",
+    transformarLinksEmCliqueAqui("👋 Olá! Sou o MaxBot, o assistente virtual do seu condomínio. Estou aqui para te ajudar com dúvidas, notificações, documentos, regras internas e muito mais. Digite sua mensagem abaixo e veja como posso ajudar. 😊"),
     "bot"
   );
 };
@@ -20,7 +20,6 @@ form.addEventListener("submit", async (e) => {
   adicionarMensagem("Você", pergunta, "user");
   input.value = "";
 
-  // Animação "digitando..."
   const digitando = document.createElement("div");
   digitando.classList.add("mensagem-bot");
   digitando.textContent = "MaxBot está digitando...";
@@ -36,12 +35,10 @@ form.addEventListener("submit", async (e) => {
 
     const data = await resposta.json();
     thread_id = data.thread_id;
-
     respostaDiv.removeChild(digitando);
 
     if (data.resposta) {
-      const respostaFormatada = transformarLinksEmCliqueAqui(data.resposta);
-      adicionarMensagem("MaxBot", respostaFormatada, "bot");
+      adicionarMensagem("MaxBot", transformarLinksEmCliqueAqui(data.resposta), "bot");
     } else {
       adicionarMensagem("Erro", "Não houve resposta do assistente.", "erro");
     }
@@ -64,18 +61,17 @@ function adicionarMensagem(remetente, mensagem, tipo) {
     div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
   } else {
     div.classList.add("mensagem-erro");
-    div.textContent = `${remetente}: ${mensagem}`;
+    div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
   }
 
   respostaDiv.appendChild(div);
   respostaDiv.scrollTop = respostaDiv.scrollHeight;
 }
 
-// 🔁 Converte [texto](link) para <a href="link">Clique aqui</a>
 function transformarLinksEmCliqueAqui(texto) {
   return texto
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${textoLink}</a>`;
     })
     .replace(/\n/g, "<br>");
 }
