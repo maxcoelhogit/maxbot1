@@ -20,7 +20,6 @@ form.addEventListener("submit", async (e) => {
   adicionarMensagem("Você", pergunta, "user");
   input.value = "";
 
-  // ✅ Adiciona dinamicamente a animação "digitando"
   const digitando = document.createElement("div");
   digitando.classList.add("mensagem-bot");
   digitando.textContent = "MaxBot está digitando...";
@@ -37,11 +36,11 @@ form.addEventListener("submit", async (e) => {
     const data = await resposta.json();
     thread_id = data.thread_id;
 
-    // ✅ Remove o "digitando" antes de mostrar a resposta real
     respostaDiv.removeChild(digitando);
 
     if (data.resposta) {
-      adicionarMensagem("MaxBot", formatarLinks(data.resposta), "bot", true);
+      const respostaFormatada = formatarLinksMarkdown(data.resposta);
+      adicionarMensagem("MaxBot", respostaFormatada, "bot", true);
     } else {
       adicionarMensagem("Erro", "Não houve resposta do assistente.", "erro");
     }
@@ -61,9 +60,7 @@ function adicionarMensagem(remetente, mensagem, tipo, isHTML = false) {
     div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
   } else if (tipo === "bot") {
     div.classList.add("mensagem-bot");
-    div.innerHTML = isHTML
-      ? `<strong>${remetente}:</strong> ${mensagem}`
-      : `<strong>${remetente}:</strong> ${escapeHTML(mensagem)}`;
+    div.innerHTML = `<strong>${remetente}:</strong> ${isHTML ? mensagem : escapeHTML(mensagem)}`;
   } else {
     div.classList.add("mensagem-erro");
     div.textContent = `${remetente}: ${mensagem}`;
@@ -73,15 +70,13 @@ function adicionarMensagem(remetente, mensagem, tipo, isHTML = false) {
   respostaDiv.scrollTop = respostaDiv.scrollHeight;
 }
 
-function escapeHTML(text) {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, function (tag) {
+    const chars = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" };
+    return chars[tag] || tag;
+  });
 }
 
-function formatarLinks(texto) {
-  const regex = /(https?:\/\/[^\s]+)/g;
-  return texto.replace(regex, (url) => {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
-  });
+function formatarLinksMarkdown(texto) {
+  return texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, `<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>`);
 }
