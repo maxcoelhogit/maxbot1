@@ -41,7 +41,7 @@ form.addEventListener("submit", async (e) => {
     respostaDiv.removeChild(digitando);
 
     if (data.resposta) {
-      adicionarMensagem("MaxBot", data.resposta, "bot");
+      adicionarMensagem("MaxBot", formatarLinks(data.resposta), "bot", true);
     } else {
       adicionarMensagem("Erro", "Não houve resposta do assistente.", "erro");
     }
@@ -52,7 +52,7 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-function adicionarMensagem(remetente, mensagem, tipo) {
+function adicionarMensagem(remetente, mensagem, tipo, isHTML = false) {
   const div = document.createElement("div");
   div.classList.add("mensagem");
 
@@ -61,7 +61,9 @@ function adicionarMensagem(remetente, mensagem, tipo) {
     div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
   } else if (tipo === "bot") {
     div.classList.add("mensagem-bot");
-    div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
+    div.innerHTML = isHTML
+      ? `<strong>${remetente}:</strong> ${mensagem}`
+      : `<strong>${remetente}:</strong> ${escapeHTML(mensagem)}`;
   } else {
     div.classList.add("mensagem-erro");
     div.textContent = `${remetente}: ${mensagem}`;
@@ -69,4 +71,17 @@ function adicionarMensagem(remetente, mensagem, tipo) {
 
   respostaDiv.appendChild(div);
   respostaDiv.scrollTop = respostaDiv.scrollHeight;
+}
+
+function escapeHTML(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function formatarLinks(texto) {
+  const regex = /(https?:\/\/[^\s]+)/g;
+  return texto.replace(regex, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
+  });
 }
