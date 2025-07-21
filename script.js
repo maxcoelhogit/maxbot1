@@ -38,7 +38,14 @@ form.addEventListener("submit", async (e) => {
     respostaDiv.removeChild(digitando);
 
     if (data.resposta) {
-      adicionarMensagem("MaxBot", transformarLinksEmCliqueAqui(data.resposta), "bot");
+      // 🔧 Remove barras invertidas que impedem os links de serem interpretados corretamente
+      const respostaTratada = data.resposta
+        .replace(/\\\[/g, "[")
+        .replace(/\\\]/g, "]")
+        .replace(/\\\(/g, "(")
+        .replace(/\\\)/g, ")");
+
+      adicionarMensagem("MaxBot", transformarLinksEmCliqueAqui(respostaTratada), "bot");
     } else {
       adicionarMensagem("Erro", "Não houve resposta do assistente.", "erro");
     }
