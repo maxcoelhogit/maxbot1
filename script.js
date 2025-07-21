@@ -68,6 +68,7 @@ function adicionarMensagem(remetente, mensagem, tipo) {
   respostaDiv.scrollTop = respostaDiv.scrollHeight;
 }
 
+// Transforma links soltos e markdown em "Clique aqui"
 function transformarLinksEmCliqueAqui(texto) {
   let convertido = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${textoLink}</a>`;
@@ -80,15 +81,10 @@ function transformarLinksEmCliqueAqui(texto) {
   return convertido.replace(/\n/g, "<br>");
 }
 
-// ✅ Ajusta a posição do formulário quando o teclado móvel aparece
+// ✅ Adapta o campo de entrada ao teclado virtual no celular
 if (window.visualViewport) {
   visualViewport.addEventListener("resize", () => {
-    const viewportHeight = window.innerHeight;
-    const visualHeight = visualViewport.height;
-    const keyboardVisible = visualHeight < viewportHeight;
-    const offset = viewportHeight - visualHeight;
-
-    const form = document.getElementById("pergunta-form");
-    form.style.transform = keyboardVisible ? `translateY(-${offset}px)` : "translateY(0)";
+    const alturaTeclado = window.innerHeight - visualViewport.height;
+    document.body.style.paddingBottom = alturaTeclado > 0 ? `${alturaTeclado}px` : "0";
   });
 }
