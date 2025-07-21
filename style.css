@@ -15,14 +15,16 @@ body {
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   max-width: 600px;
   margin: 0 auto;
   background-color: white;
   border-radius: 10px;
-  padding: 20px;
+  padding: 20px 20px 80px; /* espaço extra para input fixo */
   box-shadow: 0px 0px 10px #ccc;
   height: 100vh;
+  overflow: hidden;
+  position: relative;
 }
 
 h1 {
@@ -41,10 +43,18 @@ h1 {
   flex-direction: column;
 }
 
-form {
+#pergunta-form {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 600px;
+  margin: auto;
   display: flex;
   gap: 10px;
-  margin-top: 10px;
+  padding: 10px 20px;
+  background: white;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
 }
 
 input[type="text"] {
@@ -96,5 +106,5 @@ footer {
   font-size: 0.7rem;
   color: #999;
   text-align: center;
-  margin-top: 10px;
+  padding: 10px;
 }
