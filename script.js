@@ -20,6 +20,7 @@ form.addEventListener("submit", async (e) => {
   adicionarMensagem("Você", pergunta, "user");
   input.value = "";
 
+  // Animação "digitando..."
   const digitando = document.createElement("div");
   digitando.classList.add("mensagem-bot");
   digitando.textContent = "MaxBot está digitando...";
@@ -39,8 +40,8 @@ form.addEventListener("submit", async (e) => {
     respostaDiv.removeChild(digitando);
 
     if (data.resposta) {
-      const respostaFormatada = formatarMarkdownParaHTML(data.resposta);
-      adicionarMensagem("MaxBot", respostaFormatada, "bot", true);
+      const respostaFormatada = transformarLinksEmCliqueAqui(data.resposta);
+      adicionarMensagem("MaxBot", respostaFormatada, "bot");
     } else {
       adicionarMensagem("Erro", "Não houve resposta do assistente.", "erro");
     }
@@ -51,16 +52,16 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-function adicionarMensagem(remetente, mensagem, tipo, isHTML = false) {
+function adicionarMensagem(remetente, mensagem, tipo) {
   const div = document.createElement("div");
   div.classList.add("mensagem");
 
   if (tipo === "user") {
     div.classList.add("mensagem-usuario");
-    div.innerHTML = `<strong>${remetente}:</strong> ${escapeHTML(mensagem)}`;
+    div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
   } else if (tipo === "bot") {
     div.classList.add("mensagem-bot");
-    div.innerHTML = `<strong>${remetente}:</strong> ${isHTML ? mensagem : escapeHTML(mensagem)}`;
+    div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
   } else {
     div.classList.add("mensagem-erro");
     div.textContent = `${remetente}: ${mensagem}`;
@@ -70,17 +71,11 @@ function adicionarMensagem(remetente, mensagem, tipo, isHTML = false) {
   respostaDiv.scrollTop = respostaDiv.scrollHeight;
 }
 
-function escapeHTML(str) {
-  return str.replace(/[&<>'"]/g, function (tag) {
-    const chars = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" };
-    return chars[tag] || tag;
-  });
-}
-
-function formatarMarkdownParaHTML(texto) {
-  // Converte [texto](link) para HTML clicável
-  let html = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, `<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>`);
-  // Converte quebras de linha em <br>
-  html = html.replace(/\n/g, "<br>");
-  return html;
+// 🔁 Converte [texto](link) para <a href="link">Clique aqui</a>
+function transformarLinksEmCliqueAqui(texto) {
+  return texto
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
+    })
+    .replace(/\n/g, "<br>");
 }
