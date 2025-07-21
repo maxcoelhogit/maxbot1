@@ -68,23 +68,20 @@ function adicionarMensagem(remetente, mensagem, tipo) {
   respostaDiv.scrollTop = respostaDiv.scrollHeight;
 }
 
-// Transforma links soltos e markdown em "Clique aqui"
 function transformarLinksEmCliqueAqui(texto) {
-  let convertido = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
+  // 🔧 Corrige \[Texto\]\(link\) => [Texto](link)
+  texto = texto.replace(/\\([\[\]\(\)])/g, "$1");
+
+  // 🔄 Markdown [Texto](https://...) → <a href="..." target="_blank">Texto</a>
+  texto = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${textoLink}</a>`;
   });
 
-  convertido = convertido.replace(/(https?:\/\/[^\s]+)/g, (url) => {
+  // 🔄 URLs soltas → <a href="..." target="_blank">Clique aqui</a>
+  texto = texto.replace(/(?<!href=")(https?:\/\/[^\s]+)/g, (url) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
   });
 
-  return convertido.replace(/\n/g, "<br>");
-}
-
-// ✅ Adapta o campo de entrada ao teclado virtual no celular
-if (window.visualViewport) {
-  visualViewport.addEventListener("resize", () => {
-    const alturaTeclado = window.innerHeight - visualViewport.height;
-    document.body.style.paddingBottom = alturaTeclado > 0 ? `${alturaTeclado}px` : "0";
-  });
+  // 🔄 Quebras de linha
+  return texto.replace(/\n/g, "<br>");
 }
