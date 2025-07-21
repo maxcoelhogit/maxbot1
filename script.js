@@ -38,14 +38,8 @@ form.addEventListener("submit", async (e) => {
     respostaDiv.removeChild(digitando);
 
     if (data.resposta) {
-      // 🔧 Remove barras invertidas que impedem os links de serem interpretados corretamente
-      const respostaTratada = data.resposta
-        .replace(/\\\[/g, "[")
-        .replace(/\\\]/g, "]")
-        .replace(/\\\(/g, "(")
-        .replace(/\\\)/g, ")");
-
-      adicionarMensagem("MaxBot", transformarLinksEmCliqueAqui(respostaTratada), "bot");
+      const respostaFormatada = transformarLinksEmCliqueAqui(data.resposta);
+      adicionarMensagem("MaxBot", respostaFormatada, "bot");
     } else {
       adicionarMensagem("Erro", "Não houve resposta do assistente.", "erro");
     }
@@ -76,16 +70,21 @@ function adicionarMensagem(remetente, mensagem, tipo) {
 }
 
 function transformarLinksEmCliqueAqui(texto) {
-  // Converte links em formato markdown: [Texto](https://...)
-  let convertido = texto.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, textoLink, url) => {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${textoLink}</a>`;
-  });
+  // Remove escapes \[ \] \( \)
+  const textoSemEscapes = texto.replace(/\\([\[\]\(\)])/g, "$1");
 
-  // Converte links soltos do tipo https://... para "Clique aqui"
-  convertido = convertido.replace(/(https?:\/\/[^\s]+)/g, (url) => {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
-  });
+  // Transforma [Texto](URL) em link clicável
+  const comLinksMarkdown = textoSemEscapes.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+
+  // Transforma URLs soltas em "Clique aqui"
+  const comLinksSoltos = comLinksMarkdown.replace(
+    /(?<!href=")(https?:\/\/[^\s]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">Clique aqui</a>'
+  );
 
   // Preserva quebras de linha
-  return convertido.replace(/\n/g, "<br>");
+  return comLinksSoltos.replace(/\n/g, "<br>");
 }
