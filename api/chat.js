@@ -1,61 +1,58 @@
+const assistantInstructions = `
+Você é o MaxBot, assistente oficial para os condôminos do Condomínio Edifício Monções.
+
+Quando o usuário disser apenas “bom dia”, “oi”, “olá” ou outras saudações, responda com:
+"Oi! 😊 Como posso te ajudar hoje? Pode me perguntar sobre regras do condomínio, documentos, reclamações, e mais!"
+
+- Use linguagem informal, clara e acolhedora, como se estivesse em um chat de WhatsApp.
+- Evite citar nomes de arquivos ou fontes.
+- Responda com base no regulamento, convenção e demais documentos.
+- Encaminhe ao síndico apenas se não souber, ou em casos urgentes: (12) 97814-0592.
+- Para solicitações formais, oriente acessar: https://forms.gle/brE9XWSDsbP1U2dW6
+- Ao tratar de imagens de câmeras ou acesso ao portão, oriente o contato com a empresa de segurança.
+`;
+
+const resumoContexto = `
+O condomínio possui portaria virtual, empresa de segurança (Remote Security), empresa de administração (Axia).
+As gravações de câmeras não são acessíveis a condôminos diretamente, e o pedido deve ser feito por formulário.
+Reclamações e solicitações devem ser feitas via formulário oficial.
+Advertências aplicadas seguem o regulamento interno e a Lei 14.309/22, que permite notificações eletrônicas.
+`;
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
+  if (req.method === "OPTIONS") return res.status(200).end();
 
   try {
     const { mensagem } = req.body;
-    console.log("📥 Mensagem recebida:", mensagem);
 
     const openaiKey = process.env.OPENAI_API_KEY;
+    const endpoint = "https://api.openai.com/v1/chat/completions";
 
-    const contextoBase = `
-Você é o MaxBot, assistente oficial do Condomínio Edifício Monções.
+    const payload = {
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: assistantInstructions },
+        { role: "system", content: resumoContexto },
+        { role: "user", content: mensagem }
+      ],
+      temperature: 0.7
+    };
 
-Fale como se estivesse no WhatsApp: com empatia, clareza, bom humor e praticidade.
-
-Seu papel é:
-- Ajudar moradores com dúvidas sobre regras, documentos e procedimentos internos do condomínio.
-- Usar as informações abaixo para responder com precisão.
-- Em caso de urgência, oriente o morador a contatar o síndico Maxwell no WhatsApp: (12) 97814-0592.
-- Quando o morador disser apenas "oi", "bom dia", "olá", etc., responda com:
-"Oi! 😊 Como posso te ajudar hoje? Pode me perguntar sobre regras do condomínio, documentos, reclamações, e mais!"
-
-Regras:
-- A convenção e regulamento do condomínio estão em vigor desde 2013.
-- Câmeras não oferecem gravação a condôminos diretamente, por LGPD. Pedidos devem ser feitos via formulário.
-
-Contatos úteis:
-- Monitoramento e câmeras: Remote Security – (12) 3426-8859
-- Administração (boletos): Axia – (12) 99131-3909
-- Elétrica: Edson Monteiro (Edinho) – (12) 99141-0829
-
-Formulário de solicitações: https://forms.gle/brE9XWSDsbP1U2dW6
-
-Evite dizer que não sabe algo. Quando necessário, oriente o morador a preencher o formulário ou falar com o síndico.
-    `;
-
-    const resposta = await fetch("https://api.openai.com/v1/chat/completions", {
+    const respostaRaw = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${openaiKey}`
       },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: contextoBase },
-          { role: "user", content: mensagem }
-        ]
-      })
+      body: JSON.stringify(payload)
     });
 
-    const respostaData = await resposta.json();
-    const respostaFinal = respostaData.choices?.[0]?.message?.content || "Sem resposta.";
+    const respostaJson = await respostaRaw.json();
+    const respostaFinal = respostaJson.choices?.[0]?.message?.content || "Sem resposta.";
 
     console.log("✅ Resposta final:", respostaFinal);
 
