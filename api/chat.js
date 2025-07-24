@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     console.log("📎 Thread ID recebido:", recebidoThreadId);
 
     const openaiKey = process.env.OPENAI_API_KEY;
-    const assistantId = "asst_9yJA8VVqi07ykPqfUxJ3RY5G"; // ID fixo do MaxBot
+    const assistantId = "asst_9yJA8VVqi07ykPqfUxJ3RY5G"; // Novo ID do MaxBot
 
     let threadId = recebidoThreadId;
 
@@ -64,20 +64,27 @@ export default async function handler(req, res) {
     const runId = runData.id;
     console.log("🏃 Run iniciada:", runId);
 
-    // Aguarda execução
-    let status = runData.status;
+    // Aguarda execução até finalizar
+    let status = "queued";
     let attempts = 0;
-    while (status !== "completed" && attempts < 10) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    let statusData = {};
+
+    while (status !== "completed" && status !== "failed" && attempts < 20) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
       const statusRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
         headers: {
           "Authorization": `Bearer ${openaiKey}`,
           "OpenAI-Beta": "assistants=v2"
         }
       });
-      const statusData = await statusRes.json();
+      statusData = await statusRes.json();
       status = statusData.status;
+      console.log(`⏳ Tentativa ${attempts + 1}: status = ${status}`);
       attempts++;
+    }
+
+    if (status !== "completed") {
+      console.warn("⚠️ A execução não foi concluída a tempo. Status final:", status);
     }
 
     // Busca resposta final
@@ -92,7 +99,7 @@ export default async function handler(req, res) {
     const ultima = respostaData.data?.find(m => m.role === "assistant");
     let resposta = ultima?.content?.[0]?.text?.value || "Sem resposta.";
 
-    // ✅ Remove referências como  
+    // ✅ Remove citações de fontes, se houver
     const respostaLimpa = resposta.replace(/【\d+:\d+†[^】]+】/g, "").trim();
 
     console.log("✅ Resposta final:", respostaLimpa);
