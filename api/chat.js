@@ -8,103 +8,58 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { mensagem, thread_id: recebidoThreadId } = req.body;
+    const { mensagem } = req.body;
     console.log("📥 Mensagem recebida:", mensagem);
-    console.log("📎 Thread ID recebido:", recebidoThreadId);
 
     const openaiKey = process.env.OPENAI_API_KEY;
-    const assistantId = "asst_9yJA8VVqi07ykPqfUxJ3RY5G"; // Novo ID do MaxBot
 
-    let threadId = recebidoThreadId;
+    const contextoBase = `
+Você é o MaxBot, assistente oficial do Condomínio Edifício Monções.
 
-    // Cria nova thread se necessário
-    if (!threadId) {
-      const novaThread = await fetch("https://api.openai.com/v1/threads", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${openaiKey}`,
-          "OpenAI-Beta": "assistants=v2"
-        }
-      });
+Fale como se estivesse no WhatsApp: com empatia, clareza, bom humor e praticidade.
 
-      const novaThreadData = await novaThread.json();
-      threadId = novaThreadData.id;
-      console.log("🧵 Nova thread criada:", threadId);
-    }
+Seu papel é:
+- Ajudar moradores com dúvidas sobre regras, documentos e procedimentos internos do condomínio.
+- Usar as informações abaixo para responder com precisão.
+- Em caso de urgência, oriente o morador a contatar o síndico Maxwell no WhatsApp: (12) 97814-0592.
+- Quando o morador disser apenas "oi", "bom dia", "olá", etc., responda com:
+"Oi! 😊 Como posso te ajudar hoje? Pode me perguntar sobre regras do condomínio, documentos, reclamações, e mais!"
 
-    // Adiciona mensagem do usuário à thread
-    await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
+Regras:
+- A convenção e regulamento do condomínio estão em vigor desde 2013.
+- Câmeras não oferecem gravação a condôminos diretamente, por LGPD. Pedidos devem ser feitos via formulário.
+
+Contatos úteis:
+- Monitoramento e câmeras: Remote Security – (12) 3426-8859
+- Administração (boletos): Axia – (12) 99131-3909
+- Elétrica: Edson Monteiro (Edinho) – (12) 99141-0829
+
+Formulário de solicitações: https://forms.gle/brE9XWSDsbP1U2dW6
+
+Evite dizer que não sabe algo. Quando necessário, oriente o morador a preencher o formulário ou falar com o síndico.
+    `;
+
+    const resposta = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${openaiKey}`,
-        "OpenAI-Beta": "assistants=v2"
+        "Authorization": `Bearer ${openaiKey}`
       },
       body: JSON.stringify({
-        role: "user",
-        content: mensagem
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: contextoBase },
+          { role: "user", content: mensagem }
+        ]
       })
     });
 
-    // Cria execução
-    const runRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${openaiKey}`,
-        "OpenAI-Beta": "assistants=v2"
-      },
-      body: JSON.stringify({
-        assistant_id: assistantId
-      })
-    });
+    const respostaData = await resposta.json();
+    const respostaFinal = respostaData.choices?.[0]?.message?.content || "Sem resposta.";
 
-    const runData = await runRes.json();
-    const runId = runData.id;
-    console.log("🏃 Run iniciada:", runId);
+    console.log("✅ Resposta final:", respostaFinal);
 
-    // Aguarda execução até finalizar
-    let status = "queued";
-    let attempts = 0;
-    let statusData = {};
-
-    while (status !== "completed" && status !== "failed" && attempts < 20) {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const statusRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
-        headers: {
-          "Authorization": `Bearer ${openaiKey}`,
-          "OpenAI-Beta": "assistants=v2"
-        }
-      });
-      statusData = await statusRes.json();
-      status = statusData.status;
-      console.log(`⏳ Tentativa ${attempts + 1}: status = ${status}`);
-      attempts++;
-    }
-
-    if (status !== "completed") {
-      console.warn("⚠️ A execução não foi concluída a tempo. Status final:", status);
-    }
-
-    // Busca resposta final
-    const respostaRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
-      headers: {
-        "Authorization": `Bearer ${openaiKey}`,
-        "OpenAI-Beta": "assistants=v2"
-      }
-    });
-
-    const respostaData = await respostaRes.json();
-    const ultima = respostaData.data?.find(m => m.role === "assistant");
-    let resposta = ultima?.content?.[0]?.text?.value || "Sem resposta.";
-
-    // ✅ Remove citações de fontes, se houver
-    const respostaLimpa = resposta.replace(/【\d+:\d+†[^】]+】/g, "").trim();
-
-    console.log("✅ Resposta final:", respostaLimpa);
-
-    res.status(200).json({ resposta: respostaLimpa, thread_id: threadId });
+    res.status(200).json({ resposta: respostaFinal });
 
   } catch (erro) {
     console.error("❌ Erro no backend:", erro);
