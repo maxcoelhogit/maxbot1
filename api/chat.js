@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     console.log("📎 Thread ID recebido:", recebidoThreadId);
 
     const openaiKey = process.env.OPENAI_API_KEY;
-    const assistantId = "asst_dk7R5Q7jPZSSB1imMz2NtfTY"; // ID fixo do MaxBot
+    const assistantId = "asst_9yJA8VVqi07ykPqfUxJ3RY5G"; // ID fixo do MaxBot
 
     let threadId = recebidoThreadId;
 
