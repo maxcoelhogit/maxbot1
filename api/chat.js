@@ -1,62 +1,110 @@
-const assistantInstructions = `
-Você é o MaxBot, assistente oficial para os condôminos do Condomínio Edifício Monções.
-
-Quando o usuário disser apenas “bom dia”, “oi”, “olá” ou outras saudações, responda com:
-"Oi! 😊 Como posso te ajudar hoje? Pode me perguntar sobre regras do condomínio, documentos, reclamações, e mais!"
-
-- Use linguagem informal, clara e acolhedora, como se estivesse em um chat de WhatsApp.
-- Evite citar nomes de arquivos ou fontes.
-- Responda com base no regulamento, convenção e demais documentos.
-- Encaminhe ao síndico apenas se não souber, ou em casos urgentes: (12) 97814-0592.
-- Para solicitações formais, oriente acessar: https://forms.gle/brE9XWSDsbP1U2dW6
-- Ao tratar de imagens de câmeras ou acesso ao portão, oriente o contato com a empresa de segurança.
-`;
-
-const resumoContexto = `
-O condomínio possui portaria virtual, empresa de segurança (Remote Security), empresa de administração (Axia).
-As gravações de câmeras não são acessíveis a condôminos diretamente, e o pedido deve ser feito por formulário.
-Reclamações e solicitações devem ser feitas via formulário oficial.
-Advertências aplicadas seguem o regulamento interno e a Lei 14.309/22, que permite notificações eletrônicas.
-`;
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   try {
-    const { mensagem } = req.body;
+    const { mensagem, thread_id: recebidoThreadId } = req.body;
+    console.log("📥 Mensagem recebida:", mensagem);
+    console.log("📎 Thread ID recebido:", recebidoThreadId);
 
     const openaiKey = process.env.OPENAI_API_KEY;
-    const endpoint = "https://api.openai.com/v1/chat/completions";
+    const assistantId = "asst_9yJA8VVqi07ykPqfUxJ3RY5G"; // Novo ID do MaxBot
 
-    const payload = {
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: assistantInstructions },
-        { role: "system", content: resumoContexto },
-        { role: "user", content: mensagem }
-      ],
-      temperature: 0.7
-    };
+    let threadId = recebidoThreadId;
 
-    const respostaRaw = await fetch(endpoint, {
+    // Cria nova thread se necessário
+    if (!threadId) {
+      const novaThread = await fetch("https://api.openai.com/v1/threads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiKey}`,
+          "OpenAI-Beta": "assistants=v2"
+        }
+      });
+
+      const novaThreadData = await novaThread.json();
+      threadId = novaThreadData.id;
+      console.log("🧵 Nova thread criada:", threadId);
+    }
+
+    // Adiciona mensagem do usuário à thread
+    await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${openaiKey}`
+        "Authorization": `Bearer ${openaiKey}`,
+        "OpenAI-Beta": "assistants=v2"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        role: "user",
+        content: mensagem
+      })
     });
 
-    const respostaJson = await respostaRaw.json();
-    const respostaFinal = respostaJson.choices?.[0]?.message?.content || "Sem resposta.";
+    // Cria execução
+    const runRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openaiKey}`,
+        "OpenAI-Beta": "assistants=v2"
+      },
+      body: JSON.stringify({
+        assistant_id: assistantId
+      })
+    });
 
-    console.log("✅ Resposta final:", respostaFinal);
+    const runData = await runRes.json();
+    const runId = runData.id;
+    console.log("🏃 Run iniciada:", runId);
 
-    res.status(200).json({ resposta: respostaFinal });
+    // Aguarda execução até finalizar
+    let status = "queued";
+    let attempts = 0;
+    let statusData = {};
+
+    while (status !== "completed" && status !== "failed" && attempts < 20) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const statusRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
+        headers: {
+          "Authorization": `Bearer ${openaiKey}`,
+          "OpenAI-Beta": "assistants=v2"
+        }
+      });
+      statusData = await statusRes.json();
+      status = statusData.status;
+      console.log(`⏳ Tentativa ${attempts + 1}: status = ${status}`);
+      attempts++;
+    }
+
+    if (status !== "completed") {
+      console.warn("⚠️ A execução não foi concluída a tempo. Status final:", status);
+    }
+
+    // Busca resposta final
+    const respostaRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
+      headers: {
+        "Authorization": `Bearer ${openaiKey}`,
+        "OpenAI-Beta": "assistants=v2"
+      }
+    });
+
+    const respostaData = await respostaRes.json();
+    const ultima = respostaData.data?.find(m => m.role === "assistant");
+    let resposta = ultima?.content?.[0]?.text?.value || "Sem resposta.";
+
+    // ✅ Remove citações de fontes, se houver
+    const respostaLimpa = resposta.replace(/【\d+:\d+†[^】]+】/g, "").trim();
+
+    console.log("✅ Resposta final:", respostaLimpa);
+
+    res.status(200).json({ resposta: respostaLimpa, thread_id: threadId });
 
   } catch (erro) {
     console.error("❌ Erro no backend:", erro);
