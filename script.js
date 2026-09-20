@@ -82,8 +82,12 @@ function transformarLinksEmCliqueAqui(texto) {
   });
 
   // 🔄 URLs soltas → <a href="..." target="_blank">Clique aqui</a>
-  texto = texto.replace(/(?<!href=")(https?:\/\/[^\s]+)/g, (url) => {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer">Clique aqui</a>`;
+  // Não inclui pontuação final (. , ; : ! ?) no endereço do link.
+  texto = texto.replace(/(?<!href=")(https?:\/\/[^\s<]+)/g, (url) => {
+    const matchPontuacao = url.match(/[.,;:!?]+$/);
+    const pontuacao = matchPontuacao ? matchPontuacao[0] : "";
+    const urlLimpa = pontuacao ? url.slice(0, -pontuacao.length) : url;
+    return `<a href="${urlLimpa}" target="_blank" rel="noopener noreferrer">Clique aqui</a>${pontuacao}`;
   });
 
   // 🔄 Quebras de linha
