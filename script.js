@@ -27,7 +27,11 @@ form.addEventListener("submit", async (e) => {
   respostaDiv.scrollTop = respostaDiv.scrollHeight;
 
   try {
-    const resposta = await fetch("/api/chat", {
+    const apiUrl = window.location.hostname.endsWith("github.io")
+      ? "https://maxbot-gamma.vercel.app/api/chat"
+      : "/api/chat";
+
+    const resposta = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mensagem: pergunta, thread_id }),
