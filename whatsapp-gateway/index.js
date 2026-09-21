@@ -27,6 +27,18 @@ const pendingBotSends = new Map();
 
 const state = loadState();
 
+// Migração única: limpa pausas temporárias que podem ter sido criadas
+// pela versão anterior ao confundir respostas do bot com atendimento humano.
+if (!state.handoffFixApplied) {
+  for (const [chatId, chat] of Object.entries(state.chats || {})) {
+    if (chat?.mode === "human" && Number.isFinite(chat?.pausedUntil) && chat.pausedUntil > 0) {
+      state.chats[chatId] = { mode: "bot", pausedUntil: 0 };
+    }
+  }
+  state.handoffFixApplied = true;
+  saveState();
+}
+
 function clearStaleChromiumLocks(root) {
   try {
     if (!fs.existsSync(root)) return;
