@@ -180,60 +180,41 @@ client.on("disconnected", (reason) => {
   console.error("WhatsApp desconectado:", reason);
 });
 
-client.on("message_create", async (message) => {
+async function processIncomingMessage(message) {
   try {
-    const chatId = message.fromMe ? message.to : message.from;
+    const chatId = message.from;
     if (!chatId || chatId.endsWith("@g.us") || chatId === "status@broadcast") return;
 
     const body = (message.body || "").trim();
+    console.log("Evento message recebido:", {
+      chatId,
+      fromMe: Boolean(message.fromMe),
+      hasBody: Boolean(body)
+    });
 
-    if (message.fromMe) {
-      const pending = pendingBotSends.get(chatId);
-      if (
-        pending &&
-        pending.body === body &&
-        Date.now() - pending.createdAt < 30000
-      ) {
-        pendingBotSends.delete(chatId);
-        console.log("Mensagem do próprio MaxBot reconhecida em", chatId);
-        return;
-      }
+    if (!body) return;
 
-      if (body.toLowerCase() === "#bot on") {
-        setChatMode(chatId, "bot", 0);
-        console.log("Bot ativado manualmente em", chatId);
-        return;
-      }
-
-      if (body.toLowerCase() === "#bot off") {
-        setChatMode(chatId, "human", Number.MAX_SAFE_INTEGER);
-        console.log("Bot desativado manualmente em", chatId);
-        return;
-      }
-
-      if (body) {
-        pauseForHuman(chatId);
-        console.log(`Atendimento humano detectado em ${chatId}; bot pausado por ${HUMAN_PAUSE_MINUTES} min.`);
-      }
+    const mode = getChatMode(chatId);
+    if (mode !== "bot") {
+      console.log("Mensagem ignorada porque conversa está em modo humano:", chatId);
       return;
     }
 
-    if (!body) return;
-    if (getChatMode(chatId) !== "bot") return;
-
     console.log("Mensagem recebida de", chatId);
     const answer = await callMaxBot(chatId, body);
-    if (!answer) return;
+    if (!answer) {
+      console.warn("MaxBot retornou resposta vazia para", chatId);
+      return;
+    }
 
     pendingBotSends.set(chatId, {
       body: answer,
       createdAt: Date.now()
     });
 
-    await message.reply(answer);
+    await client.sendMessage(chatId, answer);
     console.log("Resposta do MaxBot enviada para", chatId);
 
-    // Limpeza defensiva caso o evento de eco não chegue.
     setTimeout(() => {
       const pending = pendingBotSends.get(chatId);
       if (pending && Date.now() - pending.createdAt >= 30000) {
@@ -241,7 +222,58 @@ client.on("message_create", async (message) => {
       }
     }, 31000);
   } catch (err) {
-    console.error("Erro ao processar mensagem:", err);
+    console.error("Erro ao processar mensagem recebida:", err);
+  }
+}
+
+// Evento específico para mensagens recebidas de outros usuários.
+// A documentação do whatsapp-web.js separa este evento de message_create.
+client.on("message", processIncomingMessage);
+
+// message_create fica responsável apenas por mensagens enviadas pela própria conta,
+// permitindo diferenciar atendimento humano de respostas automáticas do MaxBot.
+client.on("message_create", async (message) => {
+  try {
+    if (!message.fromMe) return;
+
+    const chatId = message.to;
+    if (!chatId || chatId.endsWith("@g.us") || chatId === "status@broadcast") return;
+
+    const body = (message.body || "").trim();
+    console.log("Evento message_create próprio:", {
+      chatId,
+      hasBody: Boolean(body)
+    });
+
+    const pending = pendingBotSends.get(chatId);
+    if (
+      pending &&
+      pending.body === body &&
+      Date.now() - pending.createdAt < 30000
+    ) {
+      pendingBotSends.delete(chatId);
+      console.log("Mensagem do próprio MaxBot reconhecida em", chatId);
+      return;
+    }
+
+    if (body.toLowerCase() === "#bot on") {
+      setChatMode(chatId, "bot", 0);
+      console.log("Bot ativado manualmente em", chatId);
+      return;
+    }
+
+    if (body.toLowerCase() === "#bot off") {
+      setChatMode(chatId, "human", Number.MAX_SAFE_INTEGER);
+      console.log("Bot desativado manualmente em", chatId);
+      return;
+    }
+
+    if (body) {
+      pauseForHuman(chatId);
+      console.log(`Atendimento humano detectado em ${chatId}; bot pausado por ${HUMAN_PAUSE_MINUTES} min.`);
+    }
+  } catch (err) {
+    console.error("Erro ao processar mensagem enviada pela própria conta:", err);
   }
 });
 
