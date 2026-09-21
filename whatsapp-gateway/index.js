@@ -20,7 +20,10 @@ let latestQr = null;
 let whatsappReady = false;
 let authenticated = false;
 let selfId = null;
-let botSending = false;
+
+// Rastreia mensagens enviadas pelo próprio MaxBot para que o evento
+// message_create não as confunda com atendimento humano.
+const pendingBotSends = new Map();
 
 const state = loadState();
 
@@ -173,7 +176,16 @@ client.on("message_create", async (message) => {
     const body = (message.body || "").trim();
 
     if (message.fromMe) {
-      if (botSending) return;
+      const pending = pendingBotSends.get(chatId);
+      if (
+        pending &&
+        pending.body === body &&
+        Date.now() - pending.createdAt < 30000
+      ) {
+        pendingBotSends.delete(chatId);
+        console.log("Mensagem do próprio MaxBot reconhecida em", chatId);
+        return;
+      }
 
       if (body.toLowerCase() === "#bot on") {
         setChatMode(chatId, "bot", 0);
@@ -197,15 +209,25 @@ client.on("message_create", async (message) => {
     if (!body) return;
     if (getChatMode(chatId) !== "bot") return;
 
+    console.log("Mensagem recebida de", chatId);
     const answer = await callMaxBot(chatId, body);
     if (!answer) return;
 
-    botSending = true;
-    try {
-      await message.reply(answer);
-    } finally {
-      setTimeout(() => { botSending = false; }, 1000);
-    }
+    pendingBotSends.set(chatId, {
+      body: answer,
+      createdAt: Date.now()
+    });
+
+    await message.reply(answer);
+    console.log("Resposta do MaxBot enviada para", chatId);
+
+    // Limpeza defensiva caso o evento de eco não chegue.
+    setTimeout(() => {
+      const pending = pendingBotSends.get(chatId);
+      if (pending && Date.now() - pending.createdAt >= 30000) {
+        pendingBotSends.delete(chatId);
+      }
+    }, 31000);
   } catch (err) {
     console.error("Erro ao processar mensagem:", err);
   }
