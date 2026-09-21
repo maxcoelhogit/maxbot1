@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 import makeWASocket, {
   Browsers,
   DisconnectReason,
+  fetchLatestWaWebVersion,
   useMultiFileAuthState
 } from "@whiskeysockets/baileys";
 import { Boom } from "@hapi/boom";
@@ -13,7 +14,7 @@ import path from "path";
 const PORT = Number(process.env.PORT || 3000);
 const MAXBOT_API_URL = process.env.MAXBOT_API_URL || "https://maxbot-gamma.vercel.app/api/chat";
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "";
-const AUTH_PATH = process.env.BAILEYS_AUTH_PATH || "/data/baileys-auth";
+const AUTH_PATH = process.env.BAILEYS_AUTH_PATH || "/data/baileys-auth-v2";
 const STATE_PATH = process.env.BAILEYS_STATE_PATH || "/data/state-baileys.json";
 const HUMAN_PAUSE_MINUTES = Number(process.env.HUMAN_PAUSE_MINUTES || 30);
 
@@ -263,10 +264,22 @@ async function connectWhatsApp() {
 
   const { state: authState, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
 
+  const waVersion = await fetchLatestWaWebVersion();
+  console.log(
+    "Versão WhatsApp Web usada pelo Baileys:",
+    waVersion.version?.join("."),
+    "latest=",
+    waVersion.isLatest
+  );
+  if (waVersion.error) {
+    console.warn("Falha ao obter versão atual do WhatsApp Web; usando fallback.");
+  }
+
   sock = makeWASocket({
     auth: authState,
     logger,
-    browser: Browsers.ubuntu("Chrome"),
+    version: waVersion.version,
+    browser: Browsers.macOS("Chrome"),
     markOnlineOnConnect: false,
     syncFullHistory: false,
     emitOwnEvents: true
