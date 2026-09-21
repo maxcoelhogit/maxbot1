@@ -24,6 +24,29 @@ let botSending = false;
 
 const state = loadState();
 
+function clearStaleChromiumLocks(root) {
+  try {
+    if (!fs.existsSync(root)) return;
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      const full = path.join(root, entry.name);
+      if (entry.isDirectory()) {
+        clearStaleChromiumLocks(full);
+      } else if (/^Singleton(Lock|Socket|Cookie)$/.test(entry.name)) {
+        try {
+          fs.unlinkSync(full);
+          console.log("Lock antigo do Chromium removido:", full);
+        } catch (err) {
+          console.warn("Não foi possível remover lock do Chromium:", full, err.message);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Falha ao verificar locks do Chromium:", err.message);
+  }
+}
+
+clearStaleChromiumLocks(AUTH_PATH);
+
 function loadState() {
   try {
     if (fs.existsSync(STATE_PATH)) {
