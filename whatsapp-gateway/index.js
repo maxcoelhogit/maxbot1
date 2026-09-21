@@ -24,8 +24,36 @@ let selfId = null;
 // Rastreia mensagens enviadas pelo próprio MaxBot para que o evento
 // message_create não as confunda com atendimento humano.
 const pendingBotSends = new Map();
+const POLL_INTERVAL_MS = Number(process.env.POLL_INTERVAL_MS || 3000);
+let polling = false;
 
 const state = loadState();
+if (!Array.isArray(state.processedMessageIds)) state.processedMessageIds = [];
+if (!state.pollLastTimestamp) state.pollLastTimestamp = Math.floor(Date.now() / 1000) - 180;
+
+function getMessageKey(message) {
+  return (
+    message?.id?._serialized ||
+    message?.id?.$1 ||
+    message?.id?.id ||
+    [message?.from, message?.to, message?.timestamp, message?.body].join("|")
+  );
+}
+
+function wasProcessed(message) {
+  return state.processedMessageIds.includes(getMessageKey(message));
+}
+
+function markProcessed(message) {
+  const key = getMessageKey(message);
+  if (!state.processedMessageIds.includes(key)) {
+    state.processedMessageIds.push(key);
+    if (state.processedMessageIds.length > 500) {
+      state.processedMessageIds = state.processedMessageIds.slice(-500);
+    }
+    saveState();
+  }
+}
 
 // Migração única: limpa pausas temporárias que podem ter sido criadas
 // pela versão anterior ao confundir respostas do bot com atendimento humano.
@@ -193,6 +221,10 @@ async function processIncomingMessage(message) {
     });
 
     if (!body) return;
+    if (wasProcessed(message)) {
+      console.log("Mensagem já processada, ignorando duplicata:", getMessageKey(message));
+      return;
+    }
 
     const mode = getChatMode(chatId);
     if (mode !== "bot") {
@@ -200,6 +232,7 @@ async function processIncomingMessage(message) {
       return;
     }
 
+    markProcessed(message);
     console.log("Mensagem recebida de", chatId);
     const answer = await callMaxBot(chatId, body);
     if (!answer) {
@@ -229,6 +262,65 @@ async function processIncomingMessage(message) {
 // Evento específico para mensagens recebidas de outros usuários.
 // A documentação do whatsapp-web.js separa este evento de message_create.
 client.on("message", processIncomingMessage);
+
+async function pollIncomingMessages() {
+  if (!whatsappReady || polling) return;
+  polling = true;
+
+  try {
+    const pollStartedAt = Math.floor(Date.now() / 1000);
+    const chats = await client.getChats();
+    let found = 0;
+
+    for (const chat of chats) {
+      if (chat?.isGroup) continue;
+
+      const chatId = chat?.id?._serialized || chat?.id?.$1 || chat?.id?.user;
+      if (!chatId) continue;
+
+      // Só inspeciona conversas potencialmente novas para reduzir carga.
+      const chatTimestamp = Number(chat?.timestamp || 0);
+      const unreadCount = Number(chat?.unreadCount || 0);
+      if (unreadCount <= 0 && chatTimestamp <= state.pollLastTimestamp) continue;
+
+      let messages = [];
+      try {
+        messages = await chat.fetchMessages({ limit: Math.max(10, Math.min(30, unreadCount + 5)) });
+      } catch (err) {
+        console.warn("Falha ao buscar mensagens no polling:", chatId, err.message);
+        continue;
+      }
+
+      const incoming = messages
+        .filter((m) =>
+          !m.fromMe &&
+          (m.body || "").trim() &&
+          Number(m.timestamp || 0) > state.pollLastTimestamp &&
+          !wasProcessed(m)
+        )
+        .sort((a, b) => Number(a.timestamp || 0) - Number(b.timestamp || 0));
+
+      for (const message of incoming) {
+        found += 1;
+        console.log("Polling encontrou mensagem nova:", getMessageKey(message));
+        await processIncomingMessage(message);
+      }
+    }
+
+    state.pollLastTimestamp = Math.max(state.pollLastTimestamp, pollStartedAt);
+    saveState();
+
+    if (found > 0) {
+      console.log(`Polling processou ${found} mensagem(ns) nova(s).`);
+    }
+  } catch (err) {
+    console.error("Erro no polling de mensagens:", err);
+  } finally {
+    polling = false;
+  }
+}
+
+setInterval(pollIncomingMessages, POLL_INTERVAL_MS);
 
 // message_create fica responsável apenas por mensagens enviadas pela própria conta,
 // permitindo diferenciar atendimento humano de respostas automáticas do MaxBot.
@@ -293,6 +385,8 @@ app.get("/status", requireAdmin, (_req, res) => {
     qrPending: Boolean(latestQr),
     selfId,
     humanPauseMinutes: HUMAN_PAUSE_MINUTES,
+    pollIntervalMs: POLL_INTERVAL_MS,
+    pollLastTimestamp: state.pollLastTimestamp,
     maxBotApi: MAXBOT_API_URL
   });
 });
