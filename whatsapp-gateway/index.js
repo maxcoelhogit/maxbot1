@@ -144,7 +144,7 @@ client.on("disconnected", (reason) => {
 
 client.on("message_create", async (message) => {
   try {
-    const chatId = message.to || message.from;
+    const chatId = message.fromMe ? message.to : message.from;
     if (!chatId || chatId.endsWith("@g.us") || chatId === "status@broadcast") return;
 
     const body = (message.body || "").trim();
