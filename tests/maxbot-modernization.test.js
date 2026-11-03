@@ -7,6 +7,8 @@ import { retrievePublicKnowledge, retrievePublicProcedures, buildEvidenceContext
 import { identifyAutomatedWhatsAppMessage, MAXBOT_WHATSAPP_SIGNATURE } from '../whatsapp-gateway/message-identity.js';
 import handler from '../api/chat.js';
 import { MAXBOT_SYSTEM_PROMPT } from '../config/maxbot.js';
+import { getOperationalGuidance } from '../config/orientacoes-remotas.js';
+import { MONCOES_LOCAL_GUIDANCE } from '../config/orientacoes-local.js';
 
 const scenarios = [
  ['Que horas começa o silêncio no condomínio?', 'article', 9],
@@ -116,4 +118,41 @@ test('backend mantém contrato previous_response_id/thread_id e injeta apenas fo
     globalThis.fetch=fetchBefore;
     if(keyBefore===undefined)delete process.env.OPENAI_API_KEY;else process.env.OPENAI_API_KEY=keyBefore;
   }
+});
+
+test('identidade visual azul remove o robô vermelho e mantém idempotência de assinatura antiga', () => {
+  assert.match(MAXBOT_WHATSAPP_SIGNATURE, /^🔹 MaxBot/);
+  const old = '🤖 MaxBot | Agente Virtual do Edifício Monções\\n\\nMensagem de teste';
+  assert.equal(identifyAutomatedWhatsAppMessage(old),
+    MAXBOT_WHATSAPP_SIGNATURE + '\\n\\nMensagem de teste');
+});
+
+test('contato incorreto ausente do contexto institucional e prédio sem blocos', () => {
+  const publicGuidance = MAXBOT_SYSTEM_PROMPT + MONCOES_LOCAL_GUIDANCE +
+    JSON.stringify(PUBLIC_PROCEDURES);
+  assert.doesNotMatch(publicGuidance, /97403-1953/);
+  assert.match(publicGuidance, /24 apartamentos/);
+  assert.match(publicGuidance, /3624-7143/);
+  assert.match(publicGuidance, /não.*bloco/i);
+});
+
+test('Google Doc aprovado pode atualizar orientações, com fallback offline', async () => {
+  const doc = 'MAXBOT_ORIENTACOES_V1\\n' + 'Orientação pública de teste. '.repeat(12);
+  const ok = await getOperationalGuidance({
+    forceReload: true,
+    fetcher: async () => ({
+      ok: true, headers: { get: () => null }, text: async () => doc
+    })
+  });
+  assert.equal(ok,doc.trim());
+  const fallback = await getOperationalGuidance({
+    forceReload: true, fetcher: async () => { throw new Error('Offline'); }
+  });
+  assert.equal(fallback,MONCOES_LOCAL_GUIDANCE);
+  const html = await getOperationalGuidance({
+    forceReload: true,
+    fetcher: async () => ({ok:true,headers:{get:()=>null},
+      text:async()=>'<html>Entrar na conta</html>'})
+  });
+  assert.equal(html,MONCOES_LOCAL_GUIDANCE);
 });
