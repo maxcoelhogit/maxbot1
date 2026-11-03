@@ -122,9 +122,10 @@ test('backend mantém contrato previous_response_id/thread_id e injeta apenas fo
 
 test('identidade visual azul remove o robô vermelho e mantém idempotência de assinatura antiga', () => {
   assert.match(MAXBOT_WHATSAPP_SIGNATURE, /^🔹 MaxBot/);
-  const old = '🤖 MaxBot | Agente Virtual do Edifício Monções\\n\\nMensagem de teste';
+  const newlines = String.fromCharCode(10, 10);
+  const old = '🤖 MaxBot | Agente Virtual do Edifício Monções' + newlines + 'Mensagem de teste';
   assert.equal(identifyAutomatedWhatsAppMessage(old),
-    MAXBOT_WHATSAPP_SIGNATURE + '\\n\\nMensagem de teste');
+    MAXBOT_WHATSAPP_SIGNATURE + newlines + 'Mensagem de teste');
 });
 
 test('contato incorreto ausente do contexto institucional e prédio sem blocos', () => {
