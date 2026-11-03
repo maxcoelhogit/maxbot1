@@ -114,7 +114,7 @@ export const PUBLIC_PROCEDURES = Object.freeze([
     "goal": "Encaminhar questões financeiras individuais",
     "reference": "Contato AXIA informado no prompt de referência de 20/09/2026",
     "necessary": "Dados pessoais somente pelos canais oficiais da AXIA",
-    "orientation": "Orientar a contatar AXIA: (12) 3624-7143 / (12) 97403-1953",
+    "orientation": "Para emissão, correção e segunda via de boletos, informar apenas AXIA telefone fixo (12) 3624-7143. Não informar número celular ou WhatsApp ainda não validado para este condomínio",
     "channel": null,
     "limits": "Não acessar débitos individuais nem expor dados de terceiros",
     "access": "publico",
