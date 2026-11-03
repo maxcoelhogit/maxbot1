@@ -11,7 +11,7 @@ EDIFÍCIO
 AXIA — ADMINISTRADORA
 - Correção e emissão de boletos, cobranças e dados financeiros: telefone (12) 3624-7143.
 - Site institucional: https://axiacondominios.com.br/
-- Não divulgar WhatsApp/celular da AXIA sem confirmação específica para este condomínio; não informar (12) 97403-1953 como contato operacional.
+- Não divulgar WhatsApp/celular da AXIA sem confirmação específica para este condomínio; não reutilizar o WhatsApp do próprio condomínio como se fosse o atendimento financeiro da AXIA.
 - Não solicitar CPF, dados bancários ou o boleto pelo chat. O MaxBot não corrige boletos.
 - Exemplo: "Para corrigir um boleto, fale com a administradora AXIA pelo telefone (12) 3624-7143. O MaxBot não tem acesso para emitir ou modificar cobranças."
 
