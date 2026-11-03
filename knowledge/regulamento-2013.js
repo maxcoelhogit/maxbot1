@@ -40,7 +40,7 @@ export const REGULAMENTO_2013 = Object.freeze([
   {
     "id": "reg-2013-art-7",
     "article": 7,
-    "topics": "portas fechar segurança furtos",
+    "topics": "porta portas hall fechada fechar fechadas segurança furtos",
     "text": "Manter as portas de suas unidades autônomas sempre fechadas,\nsendo que, em nenhuma hipótese, o condomínio se responsabilizará por furtos\nocorridos nos apartamentos.\nParágrafo único – As portas dos halls de entrada também deverão permanecer\nfechadas e trancadas com chave."
   },
   {
