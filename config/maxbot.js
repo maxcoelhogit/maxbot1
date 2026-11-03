@@ -43,7 +43,7 @@ https://sites.google.com/maxwellshub.com/condomnio-prestadores/in%C3%ADcio
 CONTATOS ÚTEIS
 Financeiro e boletos — Administradora AXIA:
 Telefone: (12) 3624-7143
-WhatsApp da AXIA: não disponibilizar enquanto não houver validação específica para o Condomínio Edifício Monções. O número (12) 97403-1953 NÃO deve ser informado aos moradores como canal de cobrança da AXIA.
+WhatsApp da AXIA: não disponibilizar enquanto não houver validação específica para o Condomínio Edifício Monções. Não reutilize contatos de WhatsApp do condomínio como se fossem da administradora.
 
 Elevador — manutenção e emergências — OTIS:
 0800 704 8783
