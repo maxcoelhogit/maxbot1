@@ -1,0 +1,30 @@
+name: MaxBot 2.0 Non-destructive Checks
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and non-destructive regression tests
+        run: |
+          node --check api/chat.js
+          node --check config/maxbot.js
+          node --check config/orientacoes-local.js
+          node --check config/orientacoes-remotas.js
+          node --check whatsapp-gateway/index-baileys.js
+          node --check whatsapp-gateway/message-identity.js
+          node --check knowledge/regulamento-2013.js
+          node --check knowledge/procedures.js
+          node --check knowledge/search.js
+          node --test tests/maxbot-modernization.test.js
