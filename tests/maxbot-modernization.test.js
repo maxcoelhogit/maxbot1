@@ -58,16 +58,15 @@ const scenarios = [
 ];
 test('46 cenários: cobertura da seleção documental e dos procedimentos (sem simular qualidade da resposta da IA)', () => {
   assert.equal(scenarios.length, 46);
+  const failures = [];
   for (const [query, kind, target] of scenarios) {
     const rules = retrievePublicKnowledge(query);
     const procedures = retrievePublicProcedures(query);
-    if (kind === 'article') assert.ok(rules.some(x => x.article === target), `Não recuperou artigo ${target}: ${query}`);
-    if (kind === 'procedure') assert.ok(procedures.some(x => x.id === target), `Não recuperou procedimento ${target}: ${query}`);
-    if (kind === 'none') {
-      assert.equal(rules.length, 0, `Recuperação indevida: ${query}`);
-      assert.equal(procedures.length, 0, `Procedimento indevido: ${query}`);
-    }
+    if (kind === 'article' && !rules.some(x => x.article === target)) failures.push(`Artigo ${target}: ${query}`);
+    if (kind === 'procedure' && !procedures.some(x => x.id === target)) failures.push(`Procedimento ${target}: ${query}`);
+    if (kind === 'none' && (rules.length || procedures.length)) failures.push(`Resultado indevido: ${query}`);
   }
+  assert.deepEqual(failures, []);
 });
 test('25 artigos consecutivos, fonte e vigência explicitamente cautelosa', () => {
   assert.equal(REGULAMENTO_2013.length, 25);
@@ -83,9 +82,9 @@ test('não injeta arquivos administrativos privados na biblioteca pública', () 
 });
 test('assinatura institucional uma única vez, somente no texto entregue ao transporte', () => {
   const value = identifyAutomatedWhatsAppMessage('Olá! Já encontrei o art. 9º.');
-  assert.equal(value,`${MAXBOT_WHATSAPP_SIGNATURE}\\n\\nOlá! Já encontrei o art. 9º.`);
+  assert.equal(value,MAXBOT_WHATSAPP_SIGNATURE + String.fromCharCode(10, 10) + 'Olá! Já encontrei o art. 9º.');
   assert.equal(identifyAutomatedWhatsAppMessage(value),value);
-  assert.equal(identifyAutomatedWhatsAppMessage(MAXBOT_WHATSAPP_SIGNATURE+'\\n\\n'+value),value);
+  assert.equal(identifyAutomatedWhatsAppMessage(MAXBOT_WHATSAPP_SIGNATURE+String.fromCharCode(10, 10)+value),value);
   assert.equal(identifyAutomatedWhatsAppMessage(''), '');
 });
 test('handoff, estado e pendingBotSends preservados no caminho do gateway (verificação estrutural)', () => {
