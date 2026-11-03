@@ -10,6 +10,7 @@ import { Boom } from "@hapi/boom";
 import P from "pino";
 import fs from "fs";
 import path from "path";
+import { identifyAutomatedWhatsAppMessage } from "./message-identity.js";
 
 const PORT = Number(process.env.PORT || 3000);
 const MAXBOT_API_URL = process.env.MAXBOT_API_URL || "https://maxbot-gamma.vercel.app/api/chat";
@@ -323,12 +324,14 @@ async function handleMessage(message, upsertType) {
       return;
     }
 
+    // A assinatura entra somente na saída automática; o eco compara o texto final idêntico.
+    const outbound = identifyAutomatedWhatsAppMessage(answer);
     pendingBotSends.set(jid, {
-      body: answer,
+      body: outbound,
       createdAt: Date.now()
     });
 
-    await sock.sendMessage(jid, { text: answer });
+    await sock.sendMessage(jid, { text: outbound });
     console.log("Resposta do MaxBot enviada via Baileys:", jid);
 
     setTimeout(() => {
