@@ -1,0 +1,147 @@
+// Procedimentos orientativos: não são decisões nem normas novas.
+export const PUBLIC_PROCEDURES = Object.freeze([
+  {
+    "id": "reclamacoes",
+    "keywords": "reclamação denúncia notificação infração desentendimento",
+    "goal": "Registrar relato sem prejulgar conduta",
+    "reference": "Regulamento 2013 art. 3º, item 3; formulário institucional informado pela Administração",
+    "necessary": "Fatos, data, local e descrição objetiva suficientes para apuração",
+    "orientation": "Orientar a formalização e explicar que registro não comprova infração",
+    "channel": "https://docs.google.com/forms/d/e/1FAIpQLScETwWaGVA8ncNRCBwLwVWjBfRHlrD8v9dAAvCn9qDPwARgMw/viewform",
+    "limits": "Não determinar advertência ou multa; situações graves demandam Administração",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "confidencialidade",
+    "keywords": "reclamante anonimato identidade sigilo confidencial",
+    "goal": "Explicar identidade preservada perante terceiros",
+    "reference": "Formulário institucional; orientações administrativas a confirmar",
+    "necessary": "Se busca preservação de identidade, instruir a registrar pelo canal oficial",
+    "orientation": "A identidade pode ser conhecida da Administração e preservada perante terceiros; não prometer anonimato absoluto",
+    "channel": "https://docs.google.com/forms/d/e/1FAIpQLScETwWaGVA8ncNRCBwLwVWjBfRHlrD8v9dAAvCn9qDPwARgMw/viewform",
+    "limits": "Não identificar reclamantes nem revelar relatos específicos",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "sossego",
+    "keywords": "barulho perturbação silêncio sossego música ruído",
+    "goal": "Orientar sobre ruídos",
+    "reference": "Regulamento 2013 arts. 9º e 10º, sujeito à validação de vigência",
+    "necessary": "Horário, tipo de ocorrência, local, se deseja registrar formalmente",
+    "orientation": "Esclarecer faixa 22h às 7h e que evitar perturbação também orienta uso de som",
+    "channel": "https://docs.google.com/forms/d/e/1FAIpQLScETwWaGVA8ncNRCBwLwVWjBfRHlrD8v9dAAvCn9qDPwARgMw/viewform",
+    "limits": "Não comprovar infração nem determinar penalidade",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "penalidades",
+    "keywords": "advertência multa reincidência defesa contraditório",
+    "goal": "Explicar procedimento sem julgar",
+    "reference": "Regulamento 2013 art. 22º; condições legais aplicáveis",
+    "necessary": "Fatos descritos, eventual notificação e oportunidade de esclarecimentos",
+    "orientation": "A reclamação exige avaliação; antes de sanção a unidade deve ter oportunidade adequada de manifestação",
+    "channel": "https://docs.google.com/forms/d/e/1FAIpQLScETwWaGVA8ncNRCBwLwVWjBfRHlrD8v9dAAvCn9qDPwARgMw/viewform",
+    "limits": "Não calcular nem aplicar multa; consultar AXIA quando necessário",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "cftv",
+    "keywords": "imagens câmeras gravação filmagem vídeo cftv",
+    "goal": "Orientar pedidos proporcionais de imagens",
+    "reference": "Procedimento administrativo sujeito a LGPD e avaliação caso a caso",
+    "necessary": "Data, faixa horária aproximada, local e descrição mínima da ocorrência",
+    "orientation": "Pedir registro formal; distinguir imagens próprias e de terceiros; Administração define acesso e compartilhamento",
+    "channel": "https://docs.google.com/forms/d/e/1FAIpQLScETwWaGVA8ncNRCBwLwVWjBfRHlrD8v9dAAvCn9qDPwARgMw/viewform",
+    "limits": "Não fornecer imagens ou prometer entrega; não exigir B.O. sempre",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "biometria",
+    "keywords": "biometria facial cadastro rosto visitante entrada",
+    "goal": "Orientar solicitação de cadastro facial e acessos",
+    "reference": "Formulário institucional de biometria informado pela Administração",
+    "necessary": "Usar somente dados exigidos pelo formulário oficial",
+    "orientation": "Indicar o formulário próprio e não coletar fotos pelo chat",
+    "channel": "https://docs.google.com/forms/d/e/1FAIpQLSc9a-7Oc-qtYxEnBDR0S2lCOyb85I55xAxSovZ7NZZMNPfJMw/viewform",
+    "limits": "Não aprovar nem alterar permissões de acesso",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "controles",
+    "keywords": "controle portão garagem controle remoto cadastrar acesso",
+    "goal": "Centralizar pedidos de controles",
+    "reference": "Procedimento administrativo comunicado, confirmação operacional pendente",
+    "necessary": "Identificar solicitação e unidade apenas no formulário autorizado",
+    "orientation": "Orientar solicitação formal e que valor e serviço serão informados previamente",
+    "channel": "https://docs.google.com/forms/d/e/1FAIpQLScETwWaGVA8ncNRCBwLwVWjBfRHlrD8v9dAAvCn9qDPwARgMw/viewform",
+    "limits": "Não instruir programação técnica nem prometer custo/instalação",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "manutencao",
+    "keywords": "manutenção reparo vazamento defeito infiltração lâmpada",
+    "goal": "Orientar abertura de solicitação",
+    "reference": "Canal oficial e regulamento aplicável",
+    "necessary": "Local, natureza, urgência e descrição objetiva",
+    "orientation": "Indicar registro e distinguir risco imediato que requer ação prioritária",
+    "channel": "https://docs.google.com/forms/d/e/1FAIpQLScETwWaGVA8ncNRCBwLwVWjBfRHlrD8v9dAAvCn9qDPwARgMw/viewform",
+    "limits": "Não autorizar obras nem classificar responsabilidade sem apuração",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "elevador",
+    "keywords": "elevador pane preso travado otis emergência",
+    "goal": "Encaminhar urgências técnicas",
+    "reference": "Contato OTIS informado no prompt de referência de 20/09/2026",
+    "necessary": "Descrever se há pessoa presa e localização mínima necessária ao serviço",
+    "orientation": "Em emergência ligar imediatamente para OTIS: 0800 704 8783; risco à vida requer serviços de emergência",
+    "channel": null,
+    "limits": "Não prometer resgate em prazo específico",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "financeiro",
+    "keywords": "boleto pagamento segunda via financeiro cobrança axia taxa",
+    "goal": "Encaminhar questões financeiras individuais",
+    "reference": "Contato AXIA informado no prompt de referência de 20/09/2026",
+    "necessary": "Dados pessoais somente pelos canais oficiais da AXIA",
+    "orientation": "Orientar a contatar AXIA: (12) 3624-7143 / (12) 97403-1953",
+    "channel": null,
+    "limits": "Não acessar débitos individuais nem expor dados de terceiros",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "documentos",
+    "keywords": "documento convenção regulamento ata assembleia copia acesso",
+    "goal": "Orientar acesso aos documentos",
+    "reference": "Portal oficial do condomínio e Reg. 2013 art. 3º, item 6",
+    "necessary": "Especificar documento de interesse",
+    "orientation": "Fornecer página oficial de documentos e indicar solicitação formal quando necessário",
+    "channel": "https://sites.google.com/maxwellshub.com/documentos-oficiais/in%C3%ADcio",
+    "limits": "Não disponibilizar documentos restritos automaticamente",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  },
+  {
+    "id": "garagem",
+    "keywords": "vaga garagem estacionamento bicicleta portão visitante veículo",
+    "goal": "Informar regras sobre garagem",
+    "reference": "Regulamento 2013 arts. 18º e 19º, sujeito à validação de vigência",
+    "necessary": "Qual é o uso ou ocorrência em questão",
+    "orientation": "Explicar somente a regra expressa sobre demarcação, depósito, circulação e fechamento",
+    "channel": "https://sites.google.com/maxwellshub.com/portal-regras/in%C3%ADcio",
+    "limits": "Não deliberar sobre infração nem dados de acesso",
+    "access": "publico",
+    "status": "proposta_operacional_pendente_de_validacao_administrativa"
+  }
+]);
