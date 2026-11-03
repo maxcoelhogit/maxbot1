@@ -20,6 +20,8 @@ jobs:
         run: |
           node --check api/chat.js
           node --check config/maxbot.js
+          node --check config/orientacoes-local.js
+          node --check config/orientacoes-remotas.js
           node --check whatsapp-gateway/index-baileys.js
           node --check whatsapp-gateway/message-identity.js
           node --check knowledge/regulamento-2013.js
